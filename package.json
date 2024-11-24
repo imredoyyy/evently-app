@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "bunx drizzle-kit migrate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
