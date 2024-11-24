@@ -22,7 +22,6 @@ const auth = betterAuth({
       role: {
         type: "string",
         defaultValue: "user",
-        input: false, // Don't allow users to set role
       },
     },
   },

@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -23,7 +26,7 @@ import {
   type SignInValues,
   type SignUpValues,
 } from "@/app/(auth)/zod-schemas";
-import { Loader2Icon } from "lucide-react";
+import { signIn, signUp } from "@/lib/auth-client";
 
 type AuthFormProps = {
   mode?: "sign-in" | "sign-up";
@@ -42,9 +45,74 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
       password: "",
     },
   });
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") ?? "/";
+  const isHostLogin =
+    pathname === "/host-sign-in" || pathname === "/host-sign-up";
 
-  const onSubmit = (values: SignInValues | SignUpValues) => {
-    console.log(values);
+  const handleSignIn = async (data: SignInValues) => {
+    await signIn.email(
+      { ...data },
+      {
+        onRequest: () => setLoading(true),
+        onSuccess: (c) => {
+          setLoading(false);
+          if (Boolean(c.data?.twoFactorRedirect)) router.push("/two-factor");
+          else {
+            toast.success("Sign in successfull");
+            router.push(redirect);
+          }
+        },
+        onError: (c) => {
+          setLoading(false);
+          toast.error(
+            c.error.message ?? "Something went wrong. Please try again."
+          );
+        },
+      }
+    );
+  };
+
+  const handleSignUp = async (data: SignUpValues) => {
+    await signUp.email(
+      { ...data, role: isHostLogin ? "host" : "user" },
+      {
+        onRequest: () => setLoading(true),
+        onSuccess: () => {
+          setLoading(false);
+          toast.success("Sign up successfull");
+          router.push(redirect);
+        },
+        onError: (c) => {
+          setLoading(false);
+          toast.error(
+            c.error.message ?? "Something went wrong. Please try again."
+          );
+        },
+      }
+    );
+  };
+
+  const onSubmit = async (values: SignInValues | SignUpValues) => {
+    if (mode === "sign-in") {
+      const { data, error, success } = signInSchema.safeParse(values);
+      if (!success) {
+        toast.error(error.message);
+        return;
+      }
+      await handleSignIn(data);
+    }
+
+    if (mode === "sign-up") {
+      const { data, error, success } = signUpSchema.safeParse(values);
+      if (!success) {
+        toast.error(error.message);
+        return;
+      }
+      await handleSignUp(data);
+    }
   };
 
   return (
@@ -151,7 +219,9 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
               variant="outline"
               className="w-full focus:ring-primary focus:ring-2 focus:ring-offset-2 focus:outline-none"
             >
-              <Link href={mode === "sign-in" ? "/sign-up" : "/sign-in"}>
+              <Link
+                href={`${mode === "sign-in" ? "/sign-up" : "/sign-in"}${redirect ? `?redirect=${redirect}` : ""}`}
+              >
                 {mode === "sign-in" ? "Create an account" : "Sign in"}
               </Link>
             </Button>
