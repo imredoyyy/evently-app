@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 import Site_Config from "@/config/site-config";
+import Header from "@/components/layout/header";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,6 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="!scroll-smooth" suppressHydrationWarning>
       <body className={`${geistSans.variable} font-sans antialiased`}>
+        <Header />
         <main className="flex min-h-screen flex-col">{children}</main>
         <Toaster />
       </body>
