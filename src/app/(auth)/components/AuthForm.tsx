@@ -27,6 +27,7 @@ import {
   type SignUpValues,
 } from "@/app/(auth)/zod-schemas";
 import { signIn, signUp } from "@/lib/auth-client";
+import { GoogleLoginButton } from "./google-login-button";
 
 type AuthFormProps = {
   mode?: "sign-in" | "sign-up";
@@ -122,6 +123,19 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <GoogleLoginButton redirect={redirect} className="w-full mb-6 mt-2" />
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-secondary text-muted-foreground rounded">
+              Or, continue with
+            </span>
+          </div>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             {mode === "sign-up" && (
