@@ -33,6 +33,13 @@ const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // every 1 day the session expiration is updated
   },
+  socialProviders: {
+    google: {
+      enabled: true,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+    },
+  },
   appName: "Evently",
   plugins: [
     twoFactor({
