@@ -49,8 +49,7 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/";
-  const isHostLogin =
-    pathname === "/host-sign-in" || pathname === "/host-sign-up";
+  const isHostSignUp = pathname === "/host-sign-up";
 
   const handleSignIn = async (data: SignInValues) => {
     await signIn.email(
@@ -77,7 +76,7 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
 
   const handleSignUp = async (data: SignUpValues) => {
     await signUp.email(
-      { ...data, role: isHostLogin ? "host" : "user" },
+      { ...data, role: isHostSignUp ? "host" : "user" },
       {
         onRequest: () => setLoading(true),
         onSuccess: () => {
