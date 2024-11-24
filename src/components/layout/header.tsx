@@ -6,12 +6,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/assets/Logo";
 import MobileMenu from "@/components/layout/mobile-menu";
+import { UserButton } from "@/components/user-button";
 
 import { Nav_Links } from "@/constants";
 import useScroll from "@/hooks/use-scroll";
 import { cn } from "@/lib/utils";
+import type { Session } from "@/types";
 
-const Header = () => {
+const Header = ({ session }: { session: Session }) => {
   const scrolled = useScroll(40);
   const pathname = usePathname();
 
@@ -51,12 +53,19 @@ const Header = () => {
             <Button variant="outline" asChild>
               <Link href="/host-sign-up">Join as Host</Link>
             </Button>
-            <Button asChild>
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
+            {session ? (
+              <UserButton session={session} />
+            ) : (
+              <Button asChild>
+                <Link href="/sign-in">Sign In</Link>
+              </Button>
+            )}
           </div>
         </div>
-        <MobileMenu />
+        <div className="flex items-center gap-4 lg:hidden">
+          <UserButton session={session} />
+          <MobileMenu session={session} />
+        </div>
       </div>
     </header>
   );

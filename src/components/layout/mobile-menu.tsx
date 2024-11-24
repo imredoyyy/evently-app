@@ -20,8 +20,9 @@ import { cn } from "@/lib/utils";
 import { Nav_Links } from "@/constants";
 import useWindowSize from "@/hooks/use-window-size";
 import useToggleState from "@/hooks/useToggleState";
+import { Session } from "@/types";
 
-const MobileMenu = () => {
+const MobileMenu = ({ session }: { session: Session }) => {
   const [open, toggleOpen] = useToggleState(false);
   const pathname = usePathname();
   const { width } = useWindowSize();
@@ -72,15 +73,17 @@ const MobileMenu = () => {
         </ul>
         <Separator />
         <div className="space-y-4 p-4">
-          <Button asChild>
-            <Link
-              href="/sign-in"
-              className="w-full"
-              onClick={() => setTimeout(() => handleCloseMenu(), 300)}
-            >
-              Sign In
-            </Link>
-          </Button>
+          {!session && (
+            <Button asChild>
+              <Link
+                href="/sign-in"
+                className="w-full"
+                onClick={() => setTimeout(() => handleCloseMenu(), 300)}
+              >
+                Sign In
+              </Link>
+            </Button>
+          )}
 
           <Button variant="outline" asChild>
             <Link
