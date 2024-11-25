@@ -49,8 +49,8 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") ?? "/";
-  const isHostSignUp = pathname === "/host-sign-up";
+  const redirect = searchParams.get("redirect");
+  const isHost = pathname === "/host-sign-up" || pathname === "/host-sign-in";
 
   const handleSignIn = async (data: SignInValues) => {
     await signIn.email(
@@ -62,7 +62,7 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
           if (Boolean(c.data?.twoFactorRedirect)) router.push("/two-factor");
           else {
             toast.success("Sign in successfull");
-            router.push(redirect);
+            router.push(redirect ?? "/");
           }
         },
         onError: (c) => {
@@ -77,13 +77,13 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
 
   const handleSignUp = async (data: SignUpValues) => {
     await signUp.email(
-      { ...data, role: isHostSignUp ? "host" : "user" },
+      { ...data, role: isHost ? "host" : "user" },
       {
         onRequest: () => setLoading(true),
         onSuccess: () => {
           setLoading(false);
           toast.success("Sign up successfull");
-          router.push(redirect);
+          router.push(redirect ?? "/");
         },
         onError: (c) => {
           setLoading(false);
@@ -115,6 +115,18 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
     }
   };
 
+  const generateRoleBasedLink = () => {
+    if (mode === "sign-up" && isHost) {
+      return "/host-sign-in";
+    } else if (mode === "sign-in" && isHost) {
+      return "/host-sign-up";
+    } else if (mode === "sign-up") {
+      return "/sign-in";
+    } else {
+      return "/sign-up";
+    }
+  };
+
   return (
     <Card className="w-full sm:max-w-[400px] mx-auto">
       <CardHeader>
@@ -123,7 +135,10 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <GoogleLoginButton redirect={redirect} className="w-full mb-6 mt-2" />
+        <GoogleLoginButton
+          redirect={redirect ?? "/"}
+          className="w-full mb-6 mt-2"
+        />
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
@@ -233,7 +248,7 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
               className="w-full focus:ring-primary focus:ring-2 focus:ring-offset-2 focus:outline-none"
             >
               <Link
-                href={`${mode === "sign-in" ? "/sign-up" : "/sign-in"}${redirect ? `?redirect=${redirect}` : ""}`}
+                href={`${generateRoleBasedLink()}${redirect ? `?redirect=${redirect}` : ""}`}
               >
                 {mode === "sign-in" ? "Create an account" : "Sign in"}
               </Link>
