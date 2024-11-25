@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ThemeSwitcher } from "@/components/shared/theme-switcher";
 import { Logo } from "@/assets/Logo";
 
 import { cn } from "@/lib/utils";
@@ -94,6 +95,12 @@ const MobileMenu = ({ session }: { session: Session }) => {
               Join as Host
             </Link>
           </Button>
+        </div>
+        <Separator />
+
+        <div className="flex items-center p-4 justify-between">
+          <p>Switch Theme</p>
+          <ThemeSwitcher />
         </div>
       </SheetContent>
     </Sheet>

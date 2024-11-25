@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/assets/Logo";
 import MobileMenu from "@/components/layout/mobile-menu";
 import { UserButton } from "@/components/user-button";
+import { ThemeSwitcher } from "@/components/shared/theme-switcher";
 
 import { Nav_Links } from "@/constants";
 import useScroll from "@/hooks/use-scroll";
@@ -60,6 +61,7 @@ const Header = ({ session }: { session: Session }) => {
                 <Link href="/sign-in">Sign In</Link>
               </Button>
             )}
+            <ThemeSwitcher />
           </div>
         </div>
         <div className="flex items-center gap-4 lg:hidden">

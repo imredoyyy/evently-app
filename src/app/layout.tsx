@@ -7,6 +7,7 @@ import "./globals.css";
 import Site_Config from "@/config/site-config";
 import Header from "@/components/layout/header";
 import { getSession } from "@/utils/get-session";
+import Providers from "@/providers/providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -32,9 +33,15 @@ export default async function RootLayout({
   return (
     <html lang="en" className="!scroll-smooth" suppressHydrationWarning>
       <body className={`${geistSans.variable} font-sans antialiased`}>
-        <Header session={session!} />
-        <main className="flex min-h-screen flex-col">{children}</main>
-        <Toaster />
+        <Providers
+          attribute="class"
+          defaultTheme="dark"
+          disableTransitionOnChange
+        >
+          <Header session={session!} />
+          <main className="flex min-h-screen flex-col">{children}</main>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );
