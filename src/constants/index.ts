@@ -1,4 +1,4 @@
-import { UserButtonLinkType } from "@/types";
+import { UserLinkType } from "@/types";
 import {
   User2Icon,
   SettingsIcon,
@@ -35,7 +35,7 @@ const Common_User_ButtonLinks = [
   },
 ];
 
-const User_Button_Links: Record<string, UserButtonLinkType[]> = {
+const User_Links: Record<string, UserLinkType[]> = {
   user: [
     ...Common_User_ButtonLinks,
     {
@@ -72,4 +72,4 @@ const User_Button_Links: Record<string, UserButtonLinkType[]> = {
   ],
 };
 
-export { Nav_Links, User_Button_Links };
+export { Nav_Links, User_Links };

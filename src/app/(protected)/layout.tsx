@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 
 import { getSession } from "@/utils/get-session";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/shared/app-sidebar";
+import { ProtectedRoutesHeader } from "./components/protected-routes-header";
 
 const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await getSession();
@@ -9,7 +12,15 @@ const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => {
     redirect("/sign-in");
   }
 
-  return <main className="flex flex-col min-h-screen">{children}</main>;
+  return (
+    <SidebarProvider>
+      <AppSidebar session={session} />
+      <main className="flex flex-col min-h-screen w-full">
+        <ProtectedRoutesHeader session={session} />
+        {children}
+      </main>
+    </SidebarProvider>
+  );
 };
 
 export default ProtectedLayout;

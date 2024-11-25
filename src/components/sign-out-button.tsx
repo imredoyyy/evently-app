@@ -14,7 +14,7 @@ export const SignOutButton = ({ className, ...props }: SignOutButtonProps) => {
         type="submit"
         className="w-full flex items-center gap-2 !cursor-pointer"
       >
-        <LogOutIcon className="size-4" />
+        <LogOutIcon className="size-4 shrink-0" />
         <span>Sign Out</span>
       </button>
     </form>

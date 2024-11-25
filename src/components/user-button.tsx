@@ -13,7 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { SignOutButton } from "@/components/sign-out-button";
 
 import type { Session } from "@/types/index";
-import { User_Button_Links } from "@/constants";
+import { User_Links } from "@/constants";
 
 export const UserButton = ({ session }: { session: Session }) => {
   if (!session) return null;
@@ -56,7 +56,7 @@ export const UserButton = ({ session }: { session: Session }) => {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
 
-        {User_Button_Links[session.user?.role]?.map((link) => (
+        {User_Links[session.user?.role]?.map((link) => (
           <DropdownMenuItem key={link.href}>
             <Link href={link.href} className="flex w-full items-center gap-2">
               <link.icon className="size-4" />
