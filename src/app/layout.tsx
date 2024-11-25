@@ -5,8 +5,6 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 import Site_Config from "@/config/site-config";
-import Header from "@/components/layout/header";
-import { getSession } from "@/utils/get-session";
 import Providers from "@/providers/providers";
 
 const geistSans = localFont({
@@ -28,8 +26,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getSession();
-
   return (
     <html lang="en" className="!scroll-smooth" suppressHydrationWarning>
       <body className={`${geistSans.variable} font-sans antialiased`}>
@@ -38,8 +34,7 @@ export default async function RootLayout({
           defaultTheme="dark"
           disableTransitionOnChange
         >
-          <Header session={session!} />
-          <main className="flex min-h-screen flex-col">{children}</main>
+          {children}
           <Toaster />
         </Providers>
       </body>
