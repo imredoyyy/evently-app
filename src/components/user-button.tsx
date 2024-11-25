@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import {
@@ -8,6 +10,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { SignOutButton } from "@/components/sign-out-button";
 
 import type { Session } from "@/types/index";
 import { User_Button_Links } from "@/constants";
@@ -61,6 +64,10 @@ export const UserButton = ({ session }: { session: Session }) => {
             </Link>
           </DropdownMenuItem>
         ))}
+
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <SignOutButton />
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
