@@ -1,3 +1,4 @@
+import { SQL, sql } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -8,6 +9,7 @@ import {
   integer,
   pgEnum,
   decimal,
+  AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
 export const Role = pgEnum("role", ["user", "admin", "host"]);
@@ -185,3 +187,8 @@ export type NewTicketType = typeof ticket.$inferInsert;
 
 export type OrderType = typeof order.$inferSelect;
 export type NewOrderType = typeof order.$inferInsert;
+
+// Utility functions
+export const lowerCase = (str: AnyPgColumn): SQL => {
+  return sql`lower(${str})`;
+};
