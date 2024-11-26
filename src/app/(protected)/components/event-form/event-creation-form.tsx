@@ -50,6 +50,7 @@ export const EventCreationForm = memo(
   ({ mode = "create" }: EventCreationFormProps) => {
     const [currentStep, setCurrentStep] = useState(0);
     const initialValues = mode === "create" ? defaultFormValues : {};
+    const [files, setFiles] = useState<File[]>([]);
 
     const form = useForm<EventFormValues>({
       resolver: zodResolver(eventFormSchema),
@@ -117,7 +118,7 @@ export const EventCreationForm = memo(
     const renderStepContent = useMemo(() => {
       switch (currentStep) {
         case 0:
-          return <EventDetails control={control} />;
+          return <EventDetails control={control} setFiles={setFiles} />;
         case 1:
           return <EventDateTime control={control} />;
         case 2:

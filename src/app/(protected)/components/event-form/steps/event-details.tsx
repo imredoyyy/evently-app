@@ -1,3 +1,5 @@
+"use client";
+
 import { memo } from "react";
 
 import type { Control } from "react-hook-form";
@@ -21,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import type { EventFormValues } from "@/app/(protected)/zod-schemas";
+import { FileUploader } from "@/components/shared/file-uploader";
 
 const mockCategories = [
   { id: "1", name: "Music" },
@@ -29,9 +32,10 @@ const mockCategories = [
 
 interface EventDetailsStepProps {
   control: Control<EventFormValues>;
+  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
 }
 
-const EventDetails = memo(({ control }: EventDetailsStepProps) => {
+const EventDetails = memo(({ control, setFiles }: EventDetailsStepProps) => {
   return (
     <div className="space-y-4">
       <FormField
@@ -73,7 +77,11 @@ const EventDetails = memo(({ control }: EventDetailsStepProps) => {
           <FormItem>
             <FormLabel>Event Image</FormLabel>
             <FormControl>
-              <Input placeholder="Enter image URL" {...field} />
+              <FileUploader
+                onFieldChange={field.onChange}
+                image={field.value}
+                setFiles={setFiles}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

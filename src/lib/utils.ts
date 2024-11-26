@@ -18,3 +18,7 @@ export const isValidImageUrl = (value: unknown): value is string | File => {
   }
   return false;
 };
+
+export const convertFileToUrl = (file: File) => {
+  return URL.createObjectURL(file);
+};
