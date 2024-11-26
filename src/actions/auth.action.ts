@@ -17,7 +17,7 @@ export const signOut = async () => {
     revalidatePath("/", "layout"); // Invalidate cache of entire site
 
     // Wait for the cache to invalidate before redirecting
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     redirect("/sign-in");
   }
 };

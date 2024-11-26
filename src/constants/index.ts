@@ -5,6 +5,7 @@ import {
   CalendarCheckIcon,
   TicketCheckIcon,
   Users2Icon,
+  CalendarPlusIcon,
 } from "lucide-react";
 
 const Nav_Links = [
@@ -47,6 +48,11 @@ const User_Links: Record<string, UserLinkType[]> = {
   host: [
     ...Common_User_ButtonLinks,
     {
+      label: "Create Event",
+      href: "/create-event",
+      icon: CalendarPlusIcon,
+    },
+    {
       label: "My Events",
       href: "/organizer/my-events",
       icon: CalendarCheckIcon,
@@ -59,6 +65,11 @@ const User_Links: Record<string, UserLinkType[]> = {
   ],
   admin: [
     ...Common_User_ButtonLinks,
+    {
+      label: "Create Event",
+      href: "/create-event",
+      icon: CalendarPlusIcon,
+    },
     {
       label: "All Events",
       href: "/admin/all-events",
