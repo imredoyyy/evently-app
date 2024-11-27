@@ -28,7 +28,7 @@ interface EventDateTimeProps {
 
 export const EventDateTime = memo(({ control }: EventDateTimeProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-6 mt-10">
       <FormField
         control={control}
         name="startDateTime"
@@ -36,7 +36,7 @@ export const EventDateTime = memo(({ control }: EventDateTimeProps) => {
           <FormItem>
             <FormLabel className="flex flex-col">Start Date & Time</FormLabel>
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger asChild className="w-full">
                 <FormControl>
                   <Button
                     variant="outline"
@@ -75,7 +75,7 @@ export const EventDateTime = memo(({ control }: EventDateTimeProps) => {
           <FormItem>
             <FormLabel className="flex flex-col">End Date & Time</FormLabel>
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger asChild className="w-full">
                 <FormControl>
                   <Button
                     variant="outline"
@@ -85,7 +85,7 @@ export const EventDateTime = memo(({ control }: EventDateTimeProps) => {
                     )}
                   >
                     {field.value ? (
-                      format(field.value, "PPP HH:mm")
+                      format(field.value, "PPP p")
                     ) : (
                       <span>Pick end date</span>
                     )}

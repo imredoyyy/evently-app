@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useDropzone } from "@uploadthing/react";
 import { generateClientDropzoneAccept } from "uploadthing/client";
 import { UploadIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 
@@ -23,6 +24,11 @@ export const FileUploader = ({
 }: FileUploaderProps) => {
   const onDrop = useCallback(
     (files: File[]) => {
+      if (files[0].size > 4 * 1024 * 1024) {
+        setFiles([]);
+        toast.error("Image size must be less than 4MB");
+        return;
+      }
       setFiles(files);
       onFieldChange(convertFileToUrl(files[0]));
     },

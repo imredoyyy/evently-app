@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 
+import { useQuery } from "@tanstack/react-query";
 import type { Control } from "react-hook-form";
 
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,14 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-
-import type { EventFormValues } from "@/app/(protected)/zod-schemas";
+import { AddNewCategoryForm } from "@/app/(protected)/components/add-new-category-form";
 import { FileUploader } from "@/components/shared/file-uploader";
 
-const mockCategories = [
-  { id: "1", name: "Music" },
-  { id: "2", name: "Sports" },
-];
+import type { EventFormValues } from "@/app/(protected)/zod-schemas";
+import { getCategories } from "@/actions/category.action";
 
 interface EventDetailsStepProps {
   control: Control<EventFormValues>;
@@ -36,6 +34,11 @@ interface EventDetailsStepProps {
 }
 
 const EventDetails = memo(({ control, setFiles }: EventDetailsStepProps) => {
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
+
   return (
     <div className="space-y-4">
       <FormField
@@ -96,16 +99,23 @@ const EventDetails = memo(({ control, setFiles }: EventDetailsStepProps) => {
             <FormLabel>Category</FormLabel>
             <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="capitalize">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {mockCategories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
+                {categories && "error" in categories
+                  ? null
+                  : categories?.map((category) => (
+                      <SelectItem
+                        key={category.id}
+                        value={category.id}
+                        className="capitalize"
+                      >
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                <AddNewCategoryForm />
               </SelectContent>
             </Select>
             <FormMessage />

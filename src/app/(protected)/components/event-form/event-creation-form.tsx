@@ -1,8 +1,9 @@
 "use client";
 
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
@@ -14,6 +15,10 @@ import { LocationDetailsStep } from "./steps/location-details";
 import { TicketDetails } from "./steps/ticket-details";
 
 import { eventFormSchema, type EventFormValues } from "../../zod-schemas";
+import { createEvent } from "@/actions/event.action";
+import { Loader2Icon } from "lucide-react";
+import { useUploadThing } from "@/lib/uploadthing";
+import { toast } from "sonner";
 
 const defaultFormValues: EventFormValues = {
   title: "",
@@ -51,6 +56,9 @@ export const EventCreationForm = memo(
     const [currentStep, setCurrentStep] = useState(0);
     const initialValues = mode === "create" ? defaultFormValues : {};
     const [files, setFiles] = useState<File[]>([]);
+    const [isPending, startTransition] = useTransition();
+    const { startUpload } = useUploadThing("imageUploader");
+    const queryClient = useQueryClient();
 
     const form = useForm<EventFormValues>({
       resolver: zodResolver(eventFormSchema),
@@ -60,7 +68,7 @@ export const EventCreationForm = memo(
     const { handleSubmit, trigger, control } = form;
 
     // Submit form
-    const onSubmit = async (data: EventFormValues) => {
+    const onSubmit = (data: EventFormValues) => {
       let eventDeatails: EventFormValues = { ...data };
 
       if (data.isOnline) {
@@ -80,7 +88,32 @@ export const EventCreationForm = memo(
         };
       }
 
-      console.log(eventDeatails);
+      startTransition(async () => {
+        let imageUrl = eventDeatails.image;
+
+        if (files.length > 0) {
+          const imageUploadResult = await startUpload(files);
+          if (!imageUploadResult) {
+            toast.error("Failed to upload image");
+            return;
+          }
+          imageUrl = imageUploadResult[0].url;
+        }
+
+        if (mode === "create") {
+          const res = await createEvent({ ...eventDeatails, image: imageUrl });
+          if ("error" in res) {
+            toast.error(res.error);
+            return;
+          } else if ("success" in res) {
+            queryClient.invalidateQueries({ queryKey: ["events"] });
+            toast.success(res.success);
+            form.reset();
+            setCurrentStep(0);
+            return;
+          }
+        }
+      });
     };
 
     const stepFields = useMemo(
@@ -148,13 +181,14 @@ export const EventCreationForm = memo(
                     variant="outline"
                     type="button"
                     onClick={prevStep}
-                    disabled={currentStep === 0}
+                    disabled={isPending || currentStep === 0}
                   >
                     Previous
                   </Button>
 
                   {currentStep === Form_Steps.length - 1 ? (
-                    <Button type="submit">
+                    <Button type="submit" disabled={isPending}>
+                      {isPending && <Loader2Icon className="animate-spin" />}
                       {mode === "create" ? "Create Event" : "Update Event"}
                     </Button>
                   ) : (
