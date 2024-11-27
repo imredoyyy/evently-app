@@ -5,16 +5,17 @@ import {
   isServer,
   QueryClient,
   QueryClientProvider,
+  DefaultOptions,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+import { queryConfig } from "@/config/react-query";
 
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
-      queries: {
-        staleTime: 1000 * 60 * 5,
-      },
-    },
+      ...queryConfig,
+    } satisfies DefaultOptions,
   });
 }
 

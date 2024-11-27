@@ -1,13 +1,30 @@
-import React from "react";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+
+import { getCategories } from "@/actions/category.action";
+
 import { EventCreationForm } from "../components/event-form/event-creation-form";
 import Container from "@/components/layout/container";
 
-const Page = () => {
+const CreateEventPage = async () => {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+  });
+
   return (
     <Container>
-      <EventCreationForm />
+      {/* HydrationBoundary is a Client Component, so hydration will happen there. */}
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <EventCreationForm />
+      </HydrationBoundary>
     </Container>
   );
 };
 
-export default Page;
+export default CreateEventPage;
