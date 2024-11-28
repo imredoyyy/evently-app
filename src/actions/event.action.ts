@@ -20,6 +20,24 @@ import { generateSlug } from "@/lib/utils";
 import { getTimeCondition } from "@/utils/sql";
 import { EventsWithPaginationQuery } from "@/types";
 
+const defalutQuery = {
+  id: event.id,
+  title: event.title,
+  description: event.description,
+  image: event.image,
+  location: event.location,
+  isFree: event.isFree,
+  isOnline: event.isOnline,
+  isCancelled: event.isCancelled,
+  slug: event.slug,
+  categoryId: category.id,
+  categoryName: category.name,
+  startDateTime: event.startDate,
+  endDateTime: event.endDate,
+  organizerId: user.id,
+  organizerName: user.name,
+};
+
 const createEvent = async (data: EventFormValues) => {
   try {
     const session = await getSession();
@@ -149,21 +167,7 @@ const getEventsByComplexQuery = async ({
     // Query to fetch events with pagination
     const eventsQuery = await db
       .select({
-        id: event.id,
-        title: event.title,
-        description: event.description,
-        image: event.image,
-        location: event.location,
-        isFree: event.isFree,
-        isOnline: event.isOnline,
-        isCancelled: event.isCancelled,
-        slug: event.slug,
-        categoryId: category.id,
-        categoryName: category.name,
-        startDateTime: event.startDate,
-        endDateTime: event.endDate,
-        organizerId: user.id,
-        organizerName: user.name,
+        ...defalutQuery,
         total: sql<number>`COUNT(*) OVER()`,
       })
       .from(event)
@@ -201,8 +205,48 @@ const getEventsByComplexQuery = async ({
   }
 };
 
+export const getEventBySlug = async (slug: string) => {
+  try {
+    const [eventResult] = await db
+      .select({
+        ...defalutQuery,
+      })
+      .from(event)
+      .where(
+        and(
+          eq(event.slug, slug),
+          eq(event.isCancelled, false),
+          gt(event.endDate, sql`NOW()`)
+        )
+      )
+      .innerJoin(category, eq(category.id, event.categoryId))
+      .innerJoin(user, eq(user.id, event.userId))
+      .limit(1);
+
+    if (!eventResult) {
+      throw new Error("Event not found");
+    }
+
+    const ticketDetailsResult = await db
+      .select()
+      .from(ticketDetails)
+      .where(eq(ticketDetails.eventId, eventResult.id));
+
+    return {
+      ...eventResult,
+      ticketDetails: ticketDetailsResult,
+    };
+  } catch (err) {
+    console.error("Error fetching event:", err);
+    throw new Error(
+      err instanceof Error ? err.message : "Failed to fetch event."
+    );
+  }
+};
+
 type PaginatedEventResponseType = Awaited<
   ReturnType<typeof getEventsByComplexQuery>
 >;
+type EventWithSlugResponseType = Awaited<ReturnType<typeof getEventBySlug>>;
 export { createEvent, getEventsByComplexQuery };
-export type { PaginatedEventResponseType };
+export type { PaginatedEventResponseType, EventWithSlugResponseType };
