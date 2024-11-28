@@ -1,19 +1,24 @@
 "use server";
 
+import { and, desc, eq, gt, or, sql } from "drizzle-orm";
+
 import { db } from "@/lib/db/drizzle";
 import {
   event,
+  lowerCase,
   NewEventType,
   NewTicketDetailsType,
   ticketDetails,
   user,
+  category,
 } from "@/lib/db/schema";
 
 import { EventFormValues } from "@/app/(protected)/zod-schemas";
 import { getSession } from "@/utils/get-session";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
 import { generateSlug } from "@/lib/utils";
+import { getTimeCondition } from "@/utils/sql";
+import { EventsWithPaginationQuery } from "@/types";
 
 const createEvent = async (data: EventFormValues) => {
   try {
@@ -30,17 +35,11 @@ const createEvent = async (data: EventFormValues) => {
 
     // Database based validation
     if (!existingUser) {
-      return {
-        error: "User not found",
-      };
+      throw new Error("User not found");
     }
 
-    console.log(existingUser);
-
     if (existingUser.role !== "host") {
-      return {
-        error: "Unauthorized",
-      };
+      throw new Error("Unauthorized");
     }
 
     // Validate ticket details
@@ -103,9 +102,107 @@ const createEvent = async (data: EventFormValues) => {
   } catch (err) {
     console.error(err);
     return {
-      error: "Failed to create event",
+      error: err instanceof Error ? err.message : "Failed to create event",
     };
   }
 };
 
-export { createEvent };
+const getEventsByComplexQuery = async ({
+  query,
+  categoryName,
+  timeFilter,
+  page = 1,
+  pageSize = 9,
+}: EventsWithPaginationQuery) => {
+  try {
+    // Helper function to create "WHERE" conditions
+    const buildWhereConditions = () => {
+      const conditions = [];
+
+      if (query?.trim()) {
+        const lowercaseQuery = query.trim().toLowerCase();
+        conditions.push(
+          or(
+            sql`${lowerCase(event.title)} ILIKE ${`%${lowercaseQuery}%`}`,
+            sql`${lowerCase(category.name)} ILIKE ${`%${lowercaseQuery}%`}`,
+            sql`${lowerCase(event.location)} ILIKE ${`%${lowercaseQuery}%`}`
+          )
+        );
+      }
+
+      if (categoryName) {
+        conditions.push(
+          eq(lowerCase(category.name), categoryName.toLowerCase())
+        );
+      }
+
+      if (timeFilter) {
+        const timeCondition = getTimeCondition(timeFilter);
+        if (timeCondition) conditions.push(timeCondition);
+      }
+
+      return conditions;
+    };
+
+    const whereConditions = buildWhereConditions();
+
+    // Query to fetch events with pagination
+    const eventsQuery = await db
+      .select({
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        image: event.image,
+        location: event.location,
+        isFree: event.isFree,
+        isOnline: event.isOnline,
+        isCancelled: event.isCancelled,
+        slug: event.slug,
+        categoryId: category.id,
+        categoryName: category.name,
+        startDateTime: event.startDate,
+        endDateTime: event.endDate,
+        organizerId: user.id,
+        organizerName: user.name,
+        total: sql<number>`COUNT(*) OVER()`,
+      })
+      .from(event)
+      .innerJoin(category, eq(category.id, event.categoryId))
+      .innerJoin(user, eq(user.id, event.userId))
+      .where(
+        and(
+          ...whereConditions,
+          eq(event.isCancelled, false), // Only show non-cancelled events
+          gt(event.endDate, sql`NOW()`) // Only show events that haven't ended
+        )
+      )
+      .orderBy(desc(event.createdAt), desc(event.id))
+      .limit(pageSize + 1)
+      .offset((page - 1) * pageSize);
+
+    // Determine pagination metadata
+    const total = eventsQuery[0]?.total || 0;
+    const hasNextPage = eventsQuery.length > pageSize;
+    const data = eventsQuery.slice(0, pageSize);
+
+    return {
+      events: data,
+      metadata: {
+        hasNextPage,
+        nextCursor: hasNextPage ? data[data.length - 1].id : undefined,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  } catch (err) {
+    console.error("Error fetching events:", err);
+    throw new Error("Failed to fetch events.");
+  }
+};
+
+type PaginatedEventResponseType = Awaited<
+  ReturnType<typeof getEventsByComplexQuery>
+>;
+export { createEvent, getEventsByComplexQuery };
+export type { PaginatedEventResponseType };

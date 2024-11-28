@@ -8,3 +8,32 @@ export type UserLinkType = {
   href: string;
   icon: LucideIcon;
 };
+
+export type TimeFilterType =
+  | "today"
+  | "tomorrow"
+  | "this_week"
+  | "next_week"
+  | "upcoming";
+
+export type EventsQuery = {
+  query?: string;
+  categoryName?: string;
+  timeFilter?: TimeFilterType;
+};
+
+export type EventsWithPaginationQuery = EventsQuery & {
+  page?: number;
+  pageSize?: number;
+};
+
+export type PaginatedResponse<T> = {
+  results: T[];
+  metadata: {
+    hasNextPage: boolean;
+    nextCursor?: string;
+    total: number;
+    currentPage?: number;
+    totalPages?: number;
+  };
+};
