@@ -26,7 +26,7 @@ import { AddNewCategoryForm } from "@/app/(protected)/components/add-new-categor
 import { FileUploader } from "@/components/shared/file-uploader";
 
 import type { EventFormValues } from "@/app/(protected)/zod-schemas";
-import { getCategories } from "@/actions/category.action";
+import { getCategories } from "@/lib/db/queries/category.query";
 
 interface EventDetailsStepProps {
   control: Control<EventFormValues>;
@@ -127,7 +127,7 @@ const EventDetails = memo(({ control, setFiles }: EventDetailsStepProps) => {
         control={control}
         name="isFree"
         render={({ field }) => (
-          <FormItem className="flex mt-auto flex-row items-start space-x-3 space-y-0">
+          <FormItem className="flex flex-row items-start mt-auto space-x-3 space-y-0">
             <FormControl>
               <Checkbox
                 checked={field.value}

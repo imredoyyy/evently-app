@@ -8,7 +8,7 @@ import {
 import { EventCreationForm } from "../components/event-form/event-creation-form";
 import Container from "@/components/layout/container";
 
-import { getCategories } from "@/actions/category.action";
+import { getCategories } from "@/lib/db/queries/category.query";
 import { getSession } from "@/utils/get-session";
 
 const CreateEventPage = async () => {

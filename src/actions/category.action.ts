@@ -53,24 +53,6 @@ const createCategory = async (categoryName: string) => {
   }
 };
 
-const getCategories = async () => {
-  try {
-    const categories = await db.select().from(category);
-    if (categories.length === 0) {
-      return {
-        error: "No categories found",
-      };
-    }
-
-    return categories;
-  } catch (err) {
-    console.error(err);
-    return {
-      error: "Failed to fetch categories",
-    };
-  }
-};
-
 const deleteCategory = async (id: string) => {
   try {
     await db.delete(category).where(eq(category.id, id));
@@ -85,4 +67,4 @@ const deleteCategory = async (id: string) => {
   }
 };
 
-export { createCategory, getCategories, deleteCategory };
+export { createCategory, deleteCategory };

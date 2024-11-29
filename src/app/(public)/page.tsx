@@ -7,7 +7,7 @@ import {
 import { Hero } from "@/app/(public)/components/sections/hero";
 import { UpcomingEvents } from "@/app/(public)/components/upcoming-events";
 
-import { getEventsByComplexQuery } from "@/actions/event.action";
+import { getEventsByComplexQuery } from "@/lib/db/queries/event.query";
 
 const Home = async () => {
   const queryClient = new QueryClient();

@@ -1,4 +1,4 @@
-import { getEventBySlug } from "@/actions/event.action";
+import { getEventBySlug } from "@/lib/db/queries/event.query";
 import { SingleEventDetails } from "../../components/single-event-details";
 import Container from "@/components/layout/container";
 

@@ -7,7 +7,7 @@ import { ticket, event, ticketDetails } from "@/lib/db/schema";
 
 import { TICKET_STATUS } from "@/constants";
 
-export const getTicketAvailability = async (eventId: string) => {
+const getTicketAvailability = async (eventId: string) => {
   try {
     const result = await db
       .select({
@@ -36,3 +36,5 @@ export const getTicketAvailability = async (eventId: string) => {
     );
   }
 };
+
+export { getTicketAvailability };

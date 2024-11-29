@@ -9,7 +9,7 @@ import { EventCard } from "@/components/shared/event-card";
 import Container from "@/components/layout/container";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { getEventsByComplexQuery } from "@/actions/event.action";
+import { getEventsByComplexQuery } from "@/lib/db/queries/event.query";
 
 export const UpcomingEvents = () => {
   const { data, isLoading, isError } = useQuery({
@@ -22,9 +22,9 @@ export const UpcomingEvents = () => {
       <Container>
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-60" />
-          <Skeleton className="h-6 w-20" />
+          <Skeleton className="w-20 h-6" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 lg:grid-cols-3">
           {Array.from({ length: 8 }).map((_, i) => (
             <EventCardSkeleton key={i} />
           ))}
@@ -40,13 +40,13 @@ export const UpcomingEvents = () => {
   return (
     <Container id="upcoming-events">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-xl md:text-3xl">Upcoming Events</h2>
-        <Link href="/events" className="text-primary flex items-center gap-x-1">
+        <h2 className="text-xl font-semibold md:text-3xl">Upcoming Events</h2>
+        <Link href="/events" className="flex items-center text-primary gap-x-1">
           <span>View All</span> <ArrowRightIcon className="size-4 shrink-0" />
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 lg:grid-cols-3">
         {data.events.map((event) => (
           <EventCard event={event} key={event.id} />
         ))}
