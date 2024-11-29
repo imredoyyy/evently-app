@@ -19,6 +19,7 @@ import { redirect } from "next/navigation";
 import { generateSlug } from "@/lib/utils";
 import { getTimeCondition } from "@/utils/sql";
 import { EventsWithPaginationQuery } from "@/types";
+import { getTicketAvailability } from "@/actions/ticket.action";
 
 const defalutQuery = {
   id: event.id,
@@ -231,10 +232,12 @@ export const getEventBySlug = async (slug: string) => {
       .select()
       .from(ticketDetails)
       .where(eq(ticketDetails.eventId, eventResult.id));
+    const availability = await getTicketAvailability(eventResult.id);
 
     return {
       ...eventResult,
       ticketDetails: ticketDetailsResult,
+      availability,
     };
   } catch (err) {
     console.error("Error fetching event:", err);

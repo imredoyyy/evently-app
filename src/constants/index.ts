@@ -8,6 +8,8 @@ import {
   CalendarPlusIcon,
 } from "lucide-react";
 
+import { TicketType } from "@/lib/db/schema";
+
 const Nav_Links = [
   {
     label: "Home",
@@ -83,4 +85,11 @@ const User_Links: Record<string, UserLinkType[]> = {
   ],
 };
 
-export { Nav_Links, User_Links };
+const TICKET_STATUS: Record<string, TicketType["status"]> = {
+  VALID: "valid",
+  USED: "used",
+  REFUNDED: "refunded",
+  CANCELLED: "cancelled",
+} as const;
+
+export { Nav_Links, User_Links, TICKET_STATUS };
