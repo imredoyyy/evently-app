@@ -15,6 +15,13 @@
       "when": 1732912245453,
       "tag": "0001_heavy_rafael_vega",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1732993776781,
+      "tag": "0002_careless_human_cannonball",
+      "breakpoints": true
     }
   ]
 }

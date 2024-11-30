@@ -57,9 +57,17 @@ export const event = pgTable("event", {
   userId: text("userId")
     .notNull()
     .references(() => user.id),
-  totalEarnings: decimal("totalEarnings", { precision: 10, scale: 2 }),
-  organizerEarnings: decimal("organizerEarnings", { precision: 10, scale: 2 }),
-  platformsEarnings: decimal("platformsEarnings", { precision: 10, scale: 2 }),
+  totalEarnings: decimal("totalEarnings", { precision: 10, scale: 2 }).default(
+    "0.00"
+  ),
+  organizerEarnings: decimal("organizerEarnings", {
+    precision: 10,
+    scale: 2,
+  }).default("0.00"),
+  platformsEarnings: decimal("platformsEarnings", {
+    precision: 10,
+    scale: 2,
+  }).default("0.00"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });

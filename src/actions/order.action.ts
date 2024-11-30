@@ -108,6 +108,10 @@ export const createOrder = async (data: CreateOrderParams) => {
           organizerEarnings: (
             parseFloat(eventResult.organizerEarnings!) + organizerEarning
           ).toString(),
+          totalEarnings: (
+            parseFloat(eventResult.totalEarnings!) +
+            parseFloat(data.totalAmount)
+          ).toString(),
         })
         .where(eq(event.id, data.eventId))
         .returning();
