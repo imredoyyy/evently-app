@@ -3,79 +3,104 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { stripe } from "@/lib/stripe";
-import type { CreateOrderParams } from "@/types";
+import type { CreateOrderParams, OrderItem } from "@/types";
 
 import { createOrder } from "@/actions/order.action";
 
 export const POST = async (req: Request) => {
-  const body = await req.text();
-  const sig = (await headers()).get("Stripe-Signature") as string;
-
-  let event: Stripe.Event;
-
   const webhookSecret = process.env.STRIPE_WEBHOOK;
 
   if (!webhookSecret) {
-    throw new Error("Missing Stripe webhook secret");
-  }
-
-  try {
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-  } catch (err) {
-    console.error("Stripe Webhook error: ", err);
     return NextResponse.json(
-      { error: `Webhook error: ${err || "Internal server error"}` },
+      { error: "Stripe webhook secret not configured" },
       { status: 500 }
     );
   }
 
-  const session = event?.data?.object as Stripe.Checkout.Session;
+  try {
+    const body = await req.text();
+    const sig = (await headers()).get("Stripe-Signature");
 
-  if (event.type === "checkout.session.completed") {
+    if (!sig) {
+      return NextResponse.json(
+        { error: "Missing Stripe signature" },
+        { status: 400 }
+      );
+    }
+
+    let event: Stripe.Event;
     try {
-      // Get data from Stripe session
-      const { id, amount_total, payment_status, metadata, customer } = session;
-      console.log({ id, customer });
+      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+    } catch (err) {
+      console.error(
+        `Webhook verification failed: ${err instanceof Error ? err.message : err}`
+      );
+      return NextResponse.json(
+        { error: "Webhook verification failed" },
+        { status: 400 }
+      );
+    }
 
-      if (!metadata?.userId || !metadata?.eventId || !metadata.orderItems) {
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const { metadata } = session;
+
+      if (
+        !metadata ||
+        !metadata.userId ||
+        !metadata.eventId ||
+        !metadata.orderItems
+      ) {
         return NextResponse.json(
           { error: "Missing required metadata" },
           { status: 400 }
         );
       }
 
-      // Prepare order date
+      let orderItems: OrderItem[];
+      try {
+        orderItems = JSON.parse(metadata.orderItems) as OrderItem[];
+      } catch (parseError) {
+        console.error(`Error parsing orderItems: ${parseError}`);
+        return NextResponse.json(
+          { error: "Invalid order items format in metadata" },
+          { status: 400 }
+        );
+      }
+
       const orderData: CreateOrderParams = {
-        eventId: metadata.eventId,
-        totalAmount: amount_total ? (amount_total / 100).toString() : "0.00",
         userId: metadata.userId,
-        orderItems: JSON.parse(metadata.orderItems),
+        eventId: metadata.eventId,
+        orderItems,
+        totalAmount: session.amount_total
+          ? (session.amount_total / 100).toFixed(2)
+          : "0.00",
         status:
-          payment_status === "paid" || payment_status === "no_payment_required"
+          session.payment_status === "paid" ||
+          session.payment_status === "no_payment_required"
             ? "paid"
             : "pending",
       };
 
-      const order = await createOrder(orderData);
-
-      console.log("Order creared");
-
-      return NextResponse.json({ success: true, order }, { status: 200 });
-    } catch (err) {
-      console.error("Error creating order: ", err);
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Error creating order: ",
-          err,
-        },
-        { status: 500 }
-      );
+      try {
+        const order = await createOrder(orderData);
+        return NextResponse.json({ success: true, order }, { status: 201 });
+      } catch (orderCreationError) {
+        console.error(`Order creation error: ${orderCreationError}`);
+        return NextResponse.json(
+          { error: "Failed to create the order. Please try again." },
+          { status: 500 }
+        );
+      }
+    } else {
+      console.warn(`Unhandled event type: ${event.type}`);
+      return NextResponse.json({ success: false }, { status: 200 });
     }
+  } catch (err) {
+    console.error(`Webhook error: ${err instanceof Error ? err.message : err}`);
+    return NextResponse.json(
+      { error: "Webhook processing failed" },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json(
-    { success: false, error: `Unhandled event ${event.type}` },
-    { status: 400 }
-  );
 };
