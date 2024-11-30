@@ -8,6 +8,8 @@ import type { CreateOrderParams, OrderItem } from "@/types";
 import { createOrder } from "@/actions/order.action";
 
 export const POST = async (req: Request) => {
+  const body = await req.text();
+  const signature = (await headers()).get("Stripe-Signature") as string;
   const webhookSecret = process.env.STRIPE_WEBHOOK;
 
   if (!webhookSecret) {
@@ -17,18 +19,17 @@ export const POST = async (req: Request) => {
     );
   }
 
-  try {
-    const body = await req.text();
-    const sig = (await headers()).get("Stripe-Signature");
+  let event: Stripe.Event;
 
-    if (!sig) {
+  try {
+    if (!signature) {
       return NextResponse.json(
         { error: "Missing Stripe signature" },
         { status: 400 }
       );
     }
 
-    const event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
@@ -57,17 +58,16 @@ export const POST = async (req: Request) => {
 
       const order = await createOrder(orderData);
 
-      return NextResponse.json({ success: true, order }, { status: 201 });
+      return NextResponse.json({ success: true, order }, { status: 200 });
     }
 
     return NextResponse.json(
-      { success: false, error: `Unhandled event type: ${event.type}` },
+      { success: false, error: `Unhandled Stripe event type: ${event.type}` },
       { status: 400 }
     );
   } catch (error) {
-    console.error(`Webhook error: ${error}`);
     return NextResponse.json(
-      { error: `Webhook processing failed: ${error}` },
+      { error: `Stripe webhook error ${error}` },
       { status: 500 }
     );
   }
