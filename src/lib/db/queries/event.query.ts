@@ -155,11 +155,32 @@ const getEventBySlug = async (slug: string) => {
   }
 };
 
+const getEventById = async (id: string) => {
+  try {
+    const [eventResult] = await db
+      .select()
+      .from(event)
+      .where(eq(event.id, id))
+      .limit(1);
+
+    if (!eventResult) {
+      throw new Error("Event not found");
+    }
+
+    return eventResult;
+  } catch (err) {
+    console.error("Error fetching event:", err);
+    throw new Error(
+      err instanceof Error ? err.message : "Failed to fetch event."
+    );
+  }
+};
+
 type PaginatedEventResponseType = Awaited<
   ReturnType<typeof getEventsByComplexQuery>
 >;
 type EventWithSlugResponseType = Awaited<ReturnType<typeof getEventBySlug>>;
 
-export { getEventsByComplexQuery, getEventBySlug };
+export { getEventsByComplexQuery, getEventBySlug, getEventById };
 
 export type { PaginatedEventResponseType, EventWithSlugResponseType };
