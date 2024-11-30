@@ -1,7 +1,8 @@
 import type { auth } from "@/lib/auth";
-import { EventWithSlugResponseType } from "@/lib/db/queries/event.query";
-import { EventType, OrderType } from "@/lib/db/schema";
-import { LucideIcon } from "lucide-react";
+
+import type { EventWithSlugResponseType } from "@/lib/db/queries/event.query";
+import type { OrderType } from "@/lib/db/schema";
+import type { LucideIcon } from "lucide-react";
 
 export type Session = typeof auth.$Infer.Session;
 

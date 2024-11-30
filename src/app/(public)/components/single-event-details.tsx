@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 
-import type { EventWithSlugResponseType } from "@/actions/event.action";
+import type { EventWithSlugResponseType } from "@/lib/db/queries/event.query";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime, formatPriceRange } from "@/utils/formatter";
 import TicketSelectorModal from "./ticket-selector-modal";

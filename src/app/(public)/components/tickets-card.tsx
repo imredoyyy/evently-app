@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { formatPrice } from "@/utils/formatter";
 import { useTicketSelectorModal } from "@/store/use-modal-store";
 
-import type { EventWithSlugResponseType } from "@/actions/event.action";
+import type { EventWithSlugResponseType } from "@/lib/db/queries/event.query";
 
 interface TicketsCardProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
