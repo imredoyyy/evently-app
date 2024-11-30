@@ -19,11 +19,13 @@ import {
 } from "@/components/ui/select";
 
 import { useTicketSelectorModal } from "@/store/use-modal-store";
+import { useOrderItemStore } from "@/store/use-order-items-store";
 import { formatDateTime, formatPrice } from "@/utils/formatter";
 import { cn } from "@/lib/utils";
 
-import type { EventWithSlugResponseType } from "@/actions/event.action";
-import type { TicketDetailsType } from "@/lib/db/schema";
+import type { EventWithSlugResponseType } from "@/lib/db/queries/event.query";
+import { type TicketDetailsType } from "@/lib/db/schema";
+import { CheckoutButton } from "@/app/(protected)/components/checkout-button";
 
 type Props = {
   event: EventWithSlugResponseType;
@@ -34,7 +36,7 @@ const TicketSelectorModal = ({ event }: Props) => {
     Record<string, number>
   >({});
   const { isOpen, onClose } = useTicketSelectorModal();
-
+  const { orderItems, updateOrderItem, removeOrderItem } = useOrderItemStore();
   const calculatePrice = (
     ticketDetails: TicketDetailsType,
     quantity: number
@@ -57,6 +59,21 @@ const TicketSelectorModal = ({ event }: Props) => {
       ...prev,
       [ticketId]: quantity === "0" ? 0 : parseInt(quantity),
     }));
+
+    const ticketDetails = event.ticketDetails.find(
+      (ticket) => ticket.id === ticketId
+    );
+    if (ticketDetails) {
+      updateOrderItem({
+        ticketDetailsId: ticketDetails.id,
+        quantity: parseInt(quantity),
+        ticketName: ticketDetails.name,
+        pricePerTicket: ticketDetails.price || "0.00",
+      });
+    }
+
+    // If quantity is 0, remove the item
+    if (quantity === "0") removeOrderItem(ticketId);
   };
 
   return (
@@ -163,7 +180,7 @@ const TicketSelectorModal = ({ event }: Props) => {
             </div>
           </div>
 
-          {/* TODO: Add checkout button */}
+          <CheckoutButton event={event} orderItems={orderItems} />
         </div>
       </DialogContent>
     </Dialog>
