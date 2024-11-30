@@ -72,7 +72,7 @@ export const POST = async (req: Request) => {
         userId: metadata.userId,
         eventId: metadata.eventId,
         orderItems,
-        totalAmount: session.amount_total
+        totalAmountInCents: session.amount_total
           ? (session.amount_total / 100).toFixed(2)
           : "0.00",
         status:

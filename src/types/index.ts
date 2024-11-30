@@ -1,5 +1,4 @@
 import type { auth } from "@/lib/auth";
-
 import type { EventWithSlugResponseType } from "@/lib/db/queries/event.query";
 import type { OrderType } from "@/lib/db/schema";
 import type { LucideIcon } from "lucide-react";
@@ -57,6 +56,6 @@ export type CreateOrderParams = {
   userId: string;
   eventId: string;
   orderItems: OrderItem[];
-  totalAmount: string;
+  totalAmountInCents: string;
   status: OrderType["status"];
 };
