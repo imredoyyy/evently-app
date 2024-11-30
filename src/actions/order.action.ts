@@ -24,6 +24,7 @@ export const createOrder = async (data: CreateOrderParams) => {
         .insert(order)
         .values({
           ...data,
+          amount: data.totalAmount,
           quantity: data.orderItems.reduce(
             (acc, item) => acc + item.quantity,
             0
