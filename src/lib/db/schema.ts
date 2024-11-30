@@ -43,7 +43,7 @@ export const event = pgTable("event", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description").notNull(),
-  image: varchar("image", { length: 255 }),
+  image: varchar("image", { length: 255 }).notNull(),
   location: varchar("location", { length: 255 }),
   isFree: boolean("isFree").notNull().default(false),
   isOnline: boolean("isOnline").notNull().default(false),
@@ -57,6 +57,9 @@ export const event = pgTable("event", {
   userId: text("userId")
     .notNull()
     .references(() => user.id),
+  totalEarnings: decimal("totalEarnings", { precision: 10, scale: 2 }),
+  organizerEarnings: decimal("organizerEarnings", { precision: 10, scale: 2 }),
+  platformsEarnings: decimal("platformsEarnings", { precision: 10, scale: 2 }),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
