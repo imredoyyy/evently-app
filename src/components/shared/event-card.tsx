@@ -15,7 +15,7 @@ import { PaginatedEventResponseType } from "@/lib/db/queries/event.query";
 import { formatDateTime } from "@/utils/formatter";
 
 interface EventResponse {
-  event: PaginatedEventResponseType["events"][number];
+  event: Omit<PaginatedEventResponseType["events"][number], "total">;
   metadata?: PaginatedEventResponseType["metadata"];
 }
 

@@ -113,7 +113,7 @@ export const SingleEventDetails = ({ event }: Props) => {
               </EventMetadata>
               <EventMetadata icon={UsersIcon} label="Availability">
                 <>
-                  {event.availability.remaningTickets}/
+                  {event.availability.remainingTickets}/
                   {event.availability.totalQuantity} left
                 </>
               </EventMetadata>
