@@ -176,11 +176,51 @@ const getEventById = async (id: string) => {
   }
 };
 
+const getEventsByCategoryId = async (categoryId: string, eventId: string) => {
+  try {
+    const events = await db
+      .select({ ...defalutQuery })
+      .from(event)
+      .innerJoin(category, eq(category.id, event.categoryId))
+      .innerJoin(user, eq(user.id, event.userId))
+      .where(
+        and(
+          eq(category.id, categoryId),
+          eq(event.isCancelled, false),
+          gt(event.endDate, sql`NOW()`)
+        )
+      )
+      .limit(4);
+
+    if (events.length === 0) return null;
+
+    // Filter out the event with the given eventId
+    return events.filter((event) => event.id !== eventId);
+  } catch (err) {
+    console.error("Error fetching events by category:", err);
+    throw new Error(
+      err instanceof Error ? err.message : "Failed to fetch events by category."
+    );
+  }
+};
+
 type PaginatedEventResponseType = Awaited<
   ReturnType<typeof getEventsByComplexQuery>
 >;
 type EventWithSlugResponseType = Awaited<ReturnType<typeof getEventBySlug>>;
+type EventsWithCategoryResponseType = Awaited<
+  ReturnType<typeof getEventsByCategoryId>
+>;
 
-export { getEventsByComplexQuery, getEventBySlug, getEventById };
+export {
+  getEventsByComplexQuery,
+  getEventBySlug,
+  getEventById,
+  getEventsByCategoryId,
+};
 
-export type { PaginatedEventResponseType, EventWithSlugResponseType };
+export type {
+  PaginatedEventResponseType,
+  EventWithSlugResponseType,
+  EventsWithCategoryResponseType,
+};
