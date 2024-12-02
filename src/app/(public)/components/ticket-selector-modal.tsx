@@ -137,10 +137,10 @@ const TicketSelectorModal = ({ event }: Props) => {
                       value={(i + 1).toString()}
                       disabled={
                         event.availability.isSoldout ||
-                        i + 1 > event.availability.remaningTickets
+                        i + 1 > event.availability.remainingTickets
                       }
                       className={cn(
-                        event.availability.remaningTickets < i + 1 &&
+                        event.availability.remainingTickets < i + 1 &&
                           "text-muted-foreground"
                       )}
                     >
