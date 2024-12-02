@@ -42,7 +42,7 @@ export const eventFormSchema = z
       }),
 
     // Step 3: Event Location
-    location: z.string().nullable().optional(),
+    location: z.string().optional(),
     isOnline: z.boolean().default(false),
 
     // Step 4: Ticket Details

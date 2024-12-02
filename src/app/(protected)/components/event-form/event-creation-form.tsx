@@ -20,7 +20,7 @@ import { eventFormSchema, type EventFormValues } from "../../zod-schemas";
 import { createEvent, updateEvent } from "@/actions/event.action";
 
 import { useUploadThing } from "@/lib/uploadthing";
-import type { EventByIdResponseType } from "@/lib/db/queries/event.query";
+import { EventByIdResponseType } from "@/lib/db/queries/event.query";
 
 const defaultFormValues: EventFormValues = {
   title: "",

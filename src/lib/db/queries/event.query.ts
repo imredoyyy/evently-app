@@ -15,6 +15,7 @@ import { getTimeCondition } from "@/utils/sql";
 import { getTicketAvailability } from "@/lib/db/queries/ticket.query";
 
 import type { EventsWithPaginationQuery } from "@/types";
+import { EventFormValues } from "@/app/(protected)/zod-schemas";
 
 const defalutQuery = {
   id: event.id,
@@ -156,16 +157,28 @@ const getEventBySlug = async (slug: string) => {
 const getEventById = async (id: string) => {
   try {
     const [eventResult] = await db
-      .select()
+      .select({
+        ...defalutQuery,
+      })
       .from(event)
       .where(eq(event.id, id))
+      .innerJoin(category, eq(category.id, event.categoryId))
+      .innerJoin(user, eq(user.id, event.userId))
       .limit(1);
 
     if (!eventResult) {
       throw new Error("Event not found");
     }
 
-    return eventResult;
+    const ticketDetailsResult = await db
+      .select()
+      .from(ticketDetails)
+      .where(eq(ticketDetails.eventId, id));
+
+    return {
+      ...eventResult,
+      tickets: ticketDetailsResult,
+    };
   } catch (err) {
     console.error("Error fetching event:", err);
     throw new Error(
@@ -209,6 +222,7 @@ type EventWithSlugResponseType = Awaited<ReturnType<typeof getEventBySlug>>;
 type EventsWithCategoryResponseType = Awaited<
   ReturnType<typeof getEventsByCategoryId>
 >;
+type EventByIdResponseType = Awaited<ReturnType<typeof getEventById>>;
 
 export {
   getEventsByComplexQuery,
@@ -221,4 +235,5 @@ export type {
   PaginatedEventResponseType,
   EventWithSlugResponseType,
   EventsWithCategoryResponseType,
+  EventByIdResponseType,
 };
