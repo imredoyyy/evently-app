@@ -1,3 +1,4 @@
+import { EventFormValues } from "@/app/(protected)/zod-schemas";
 import type { auth } from "@/lib/auth";
 import type { EventWithSlugResponseType } from "@/lib/db/queries/event.query";
 import type { OrderType } from "@/lib/db/schema";
@@ -69,4 +70,13 @@ export type FormUrlQueryParams = {
 export type RemoveUrlQueryParams = {
   params: string;
   keysToRemove: string[];
+};
+
+export type UpdateEventFormValues = Omit<EventFormValues, "tickets"> & {
+  slug: string;
+  tickets: Array<
+    EventFormValues["tickets"][number] & {
+      availableQuantity: number;
+    }
+  >;
 };

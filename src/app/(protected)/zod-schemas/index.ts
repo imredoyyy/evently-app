@@ -42,7 +42,7 @@ export const eventFormSchema = z
       }),
 
     // Step 3: Event Location
-    location: z.string().optional(),
+    location: z.string().nullable().optional(),
     isOnline: z.boolean().default(false),
 
     // Step 4: Ticket Details
@@ -51,10 +51,11 @@ export const eventFormSchema = z
         z.object({
           id: z.string().uuid().optional(),
           name: z.string().min(1, "Ticket name is required"),
-          description: z.string().optional(),
+          description: z.string().nullable().optional(),
           price: z.coerce
             .number()
             .min(0, "Price must be a non-negative number")
+
             .optional(),
           quantity: z.coerce
             .number()
@@ -82,7 +83,7 @@ export const eventFormSchema = z
 
     if (!data.isFree) {
       data.tickets.forEach((ticket, i) => {
-        if (ticket.price === undefined || ticket.price <= 0) {
+        if (!ticket.price || ticket.price <= 0) {
           ctx.addIssue({
             code: "custom",
             path: ["tickets", i, "price"],

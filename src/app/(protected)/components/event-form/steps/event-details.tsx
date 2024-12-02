@@ -66,6 +66,7 @@ const EventDetails = memo(({ control, setFiles }: EventDetailsStepProps) => {
                 placeholder="Describe your event"
                 {...field}
                 className="resize-y"
+                rows={7}
               />
             </FormControl>
             <FormMessage />
