@@ -1,5 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import qs from "query-string";
+
+import type { FormUrlQueryParams, RemoveUrlQueryParams } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -44,4 +47,37 @@ export const generateSlug = async (text: string, addSuffix = false) => {
     .join("");
 
   return addSuffix ? `${baseSlug}-${randomSuffix}` : baseSlug;
+};
+
+export const formUrlQuery = ({ params, updates }: FormUrlQueryParams) => {
+  const currentUrl = qs.parse(params);
+
+  Object.entries(updates).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") {
+      currentUrl[key] = value;
+    } else {
+      delete currentUrl[key];
+    }
+  });
+
+  return qs.stringify(currentUrl, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
+};
+
+export const removeKeysFromQuery = ({
+  params,
+  keysToRemove,
+}: RemoveUrlQueryParams) => {
+  const currentUrl = qs.parse(params);
+
+  keysToRemove.forEach((key) => {
+    delete currentUrl[key];
+  });
+
+  return qs.stringify(currentUrl, {
+    skipNull: true,
+    skipEmptyString: true,
+  });
 };

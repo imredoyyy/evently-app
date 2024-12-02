@@ -20,7 +20,7 @@ export type TimeFilterType =
 
 export type EventsQuery = {
   query?: string;
-  categoryName?: string;
+  categoryId?: string;
   timeFilter?: TimeFilterType;
 };
 
@@ -56,6 +56,17 @@ export type CreateOrderParams = {
   userId: string;
   eventId: string;
   orderItems: OrderItem[];
-  totalAmountInCents: string;
+  totalAmount: string;
   status: OrderType["status"];
+  paymentIntentId: string;
+};
+
+export type FormUrlQueryParams = {
+  params: string;
+  updates: Record<string, string | string[] | undefined>;
+};
+
+export type RemoveUrlQueryParams = {
+  params: string;
+  keysToRemove: string[];
 };

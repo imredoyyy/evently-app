@@ -8,6 +8,7 @@ import { Logo } from "@/assets/Logo";
 import MobileMenu from "@/components/layout/mobile-menu";
 import { UserButton } from "@/components/user-button";
 import { ThemeSwitcher } from "@/components/shared/theme-switcher";
+import { SearchBar } from "@/components/shared/search-bar";
 
 import { Nav_Links } from "@/constants";
 import useScroll from "@/hooks/use-scroll";
@@ -29,6 +30,8 @@ const Header = ({ session }: { session: Session }) => {
         <Link href="/">
           <Logo className="h-7 w-auto lg:h-8" />
         </Link>
+
+        <SearchBar />
 
         <div className="hidden items-center gap-6 lg:flex">
           <ul className="flex items-center gap-4">

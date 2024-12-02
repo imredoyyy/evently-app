@@ -18,9 +18,9 @@ export const SimilarEvents = ({ categoryId, eventId }: SimilarEventsProps) => {
     isError,
     isLoading,
   } = useQuery({
-    queryKey: ["similar-events", categoryId],
+    queryKey: ["similar-events", categoryId, eventId],
     queryFn: () => getEventsByCategoryId(categoryId, eventId),
-    enabled: !!categoryId,
+    enabled: !!categoryId && !!eventId,
   });
 
   if (isLoading) {
@@ -36,7 +36,7 @@ export const SimilarEvents = ({ categoryId, eventId }: SimilarEventsProps) => {
     );
   }
 
-  if (isError || !similarEvents) {
+  if (isError || !similarEvents || similarEvents.length === 0) {
     return null;
   }
 
