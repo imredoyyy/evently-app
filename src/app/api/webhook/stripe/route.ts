@@ -43,7 +43,7 @@ export const POST = async (req: Request) => {
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      const { metadata } = session;
+      const { metadata, payment_intent } = session;
 
       if (
         !metadata ||
@@ -57,6 +57,12 @@ export const POST = async (req: Request) => {
         );
       }
 
+      if (!payment_intent) {
+        return NextResponse.json(
+          { error: "Missing payment intent id" },
+          { status: 400 }
+        );
+      }
       let orderItems: OrderItem[];
       try {
         orderItems = JSON.parse(metadata.orderItems) as OrderItem[];
@@ -72,7 +78,7 @@ export const POST = async (req: Request) => {
         userId: metadata.userId,
         eventId: metadata.eventId,
         orderItems,
-        totalAmountInCents: session.amount_total
+        totalAmount: session.amount_total
           ? (session.amount_total / 100).toFixed(2)
           : "0.00",
         status:
@@ -80,6 +86,7 @@ export const POST = async (req: Request) => {
           session.payment_status === "no_payment_required"
             ? "paid"
             : "pending",
+        paymentIntentId: payment_intent as string,
       };
 
       try {

@@ -7,8 +7,8 @@ import { order, event, ticket, ticketDetails } from "@/lib/db/schema";
 
 import type { CreateOrderParams } from "@/types";
 
-const calculateFinancials = (totalAmountInCents: string) => {
-  const amountInCents = parseFloat(totalAmountInCents);
+const calculateFinancials = (totalAmount: string) => {
+  const amountInCents = parseFloat(totalAmount);
   const rate = 0.01; // 1%
   const platformCommision = amountInCents * rate;
   const organizerEarning = amountInCents - platformCommision;
@@ -24,11 +24,12 @@ export const createOrder = async (data: CreateOrderParams) => {
         .insert(order)
         .values({
           ...data,
-          amount: data.totalAmountInCents,
+          amount: data.totalAmount,
           quantity: data.orderItems.reduce(
             (acc, item) => acc + item.quantity,
             0
           ),
+          paymentIntentId: data.paymentIntentId,
         })
         .returning();
 
@@ -65,6 +66,7 @@ export const createOrder = async (data: CreateOrderParams) => {
             amount: (
               parseFloat(item.pricePerTicket) * item.quantity
             ).toString(),
+            paymentIntentId: data.paymentIntentId,
           })
           .returning();
 
@@ -95,7 +97,7 @@ export const createOrder = async (data: CreateOrderParams) => {
 
       // 4. Calculate financials
       const { platformCommision, organizerEarning } = calculateFinancials(
-        data.totalAmountInCents
+        data.totalAmount
       );
 
       // 5. Update the event with the financials data
@@ -110,7 +112,7 @@ export const createOrder = async (data: CreateOrderParams) => {
           ).toString(),
           totalEarnings: (
             parseFloat(eventResult.totalEarnings!) +
-            parseFloat(data.totalAmountInCents)
+            parseFloat(data.totalAmount)
           ).toString(),
         })
         .where(eq(event.id, data.eventId))

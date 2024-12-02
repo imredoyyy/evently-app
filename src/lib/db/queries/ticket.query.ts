@@ -15,8 +15,8 @@ const getTicketAvailability = async (eventId: string) => {
       .from(event)
       .innerJoin(ticketDetails, eq(ticketDetails.eventId, event.id))
       .leftJoin(ticket, eq(ticket.ticketDetailsId, ticketDetails.id))
-      .where(eq(event.id, eventId))
-      .groupBy(event.id);
+      .groupBy(event.id)
+      .having(eq(event.id, eventId));
 
     if (result.length === 0) {
       throw new Error("Event not found");

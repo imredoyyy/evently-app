@@ -36,7 +36,7 @@ const defalutQuery = {
 
 const getEventsByComplexQuery = async ({
   query,
-  categoryName,
+  categoryId,
   timeFilter,
   page = 1,
   pageSize = 9,
@@ -57,10 +57,8 @@ const getEventsByComplexQuery = async ({
         );
       }
 
-      if (categoryName) {
-        conditions.push(
-          eq(lowerCase(category.name), categoryName.toLowerCase())
-        );
+      if (categoryId) {
+        conditions.push(eq(event.categoryId, categoryId));
       }
 
       if (timeFilter) {
