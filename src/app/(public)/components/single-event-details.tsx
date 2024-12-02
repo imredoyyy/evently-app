@@ -7,7 +7,6 @@ import {
   TicketIcon,
   UsersIcon,
 } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
 
 import type { EventWithSlugResponseType } from "@/lib/db/queries/event.query";

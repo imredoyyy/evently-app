@@ -21,7 +21,6 @@ import { createEvent, updateEvent } from "@/actions/event.action";
 
 import { useUploadThing } from "@/lib/uploadthing";
 import type { EventByIdResponseType } from "@/lib/db/queries/event.query";
-import type { UpdateEventFormValues } from "@/types";
 
 const defaultFormValues: EventFormValues = {
   title: "",
@@ -74,6 +73,7 @@ export const EventCreationForm = memo(
       mode === "update" && event
         ? {
             ...event,
+            location: event.location ?? "",
             tickets: event.tickets.map((ticket) => ({
               ...ticket,
               price: ticket.price ? parseFloat(ticket.price) : undefined,
