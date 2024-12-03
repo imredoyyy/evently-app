@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db/drizzle";
-import { order, event, ticket, ticketDetails } from "@/lib/db/schema";
+import { order, event, ticket, ticketDetails, user } from "@/lib/db/schema";
 
 import type { CreateOrderParams } from "@/types";
 
@@ -67,6 +67,7 @@ export const createOrder = async (data: CreateOrderParams) => {
               parseFloat(item.pricePerTicket) * item.quantity
             ).toString(),
             paymentIntentId: data.paymentIntentId,
+            orderId: orderResult.id,
           })
           .returning();
 
@@ -125,5 +126,18 @@ export const createOrder = async (data: CreateOrderParams) => {
   } catch (err) {
     console.error("Error creating order", err);
     throw err; // Re-throw to be handled by the caller
+  }
+};
+
+const getOrderByPaymentIntentId = async (paymentIntentId: string) => {
+  try {
+    const [orderResult] = await db
+      .select()
+      .from(order)
+      .where(eq(order.paymentIntentId, paymentIntentId))
+      .innerJoin(user, eq(user.id, order.userId))
+      .limit(1);
+  } catch (err) {
+    console.error("Error fetching order by payment intent id:", err);
   }
 };

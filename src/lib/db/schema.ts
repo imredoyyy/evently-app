@@ -1,4 +1,4 @@
-import { SQL, sql } from "drizzle-orm";
+import { relations, SQL, sql } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -106,6 +106,9 @@ export const ticket = pgTable("ticket", {
   userId: text("userId")
     .notNull()
     .references(() => user.id),
+  orderId: uuid("orderId")
+    .notNull()
+    .references(() => order.id),
   amount: decimal("amount", { precision: 10, scale: 2 }),
   quantity: integer("quantity").notNull(),
   pricePerTicket: decimal("pricePerTicket", { precision: 10, scale: 2 }),
@@ -179,6 +182,91 @@ export const twoFactor = pgTable("twoFactor", {
     .notNull()
     .references(() => user.id),
 });
+
+// Relations
+export const userRelations = relations(user, ({ many }) => ({
+  events: many(event, { relationName: "userEvents" }),
+  orders: many(order, { relationName: "userOrders" }),
+  tickets: many(ticket, { relationName: "userTickets" }),
+}));
+
+export const categoryRelations = relations(category, ({ many }) => ({
+  events: many(event, { relationName: "categoryEvents" }),
+}));
+
+export const eventRelations = relations(event, ({ one, many }) => ({
+  category: one(category, {
+    fields: [event.categoryId],
+    references: [category.id],
+    relationName: "eventCategory",
+  }),
+  orders: many(order, { relationName: "eventOrders" }),
+  tickets: many(ticket, { relationName: "eventTickets" }),
+  ticketDetails: many(ticketDetails, { relationName: "eventTicketDetails" }),
+  user: one(user, {
+    fields: [event.userId],
+    references: [user.id],
+    relationName: "eventHost",
+  }),
+}));
+
+export const ticketDetailsRelations = relations(
+  ticketDetails,
+  ({ one, many }) => ({
+    event: one(event, {
+      fields: [ticketDetails.eventId],
+      references: [event.id],
+      relationName: "ticketDetailsEvent",
+    }),
+    tickets: many(ticket, { relationName: "ticketDetailsTickets" }),
+  })
+);
+
+export const ticketRelations = relations(ticket, ({ one }) => ({
+  event: one(event, {
+    fields: [ticket.eventId],
+    references: [event.id],
+    relationName: "ticketsEvent",
+  }),
+  ticketDetails: one(ticketDetails, {
+    fields: [ticket.ticketDetailsId],
+    references: [ticketDetails.id],
+    relationName: "ticketDetails",
+  }),
+  user: one(user, {
+    fields: [ticket.userId],
+    references: [user.id],
+    relationName: "ticketOwner",
+  }),
+
+  order: one(order, {
+    fields: [ticket.orderId],
+    references: [order.id],
+    relationName: "ticketOrder",
+  }),
+}));
+
+export const orderRelations = relations(order, ({ one, many }) => ({
+  event: one(event, {
+    fields: [order.eventId],
+    references: [event.id],
+    relationName: "orderEvent",
+  }),
+  user: one(user, {
+    fields: [order.userId],
+    references: [user.id],
+    relationName: "orderUser",
+  }),
+  tickets: many(ticket, { relationName: "orderTickets" }),
+}));
+
+export const twoFactorRelations = relations(twoFactor, ({ one }) => ({
+  user: one(user, {
+    fields: [twoFactor.userId],
+    references: [user.id],
+    relationName: "twoFactorUser",
+  }),
+}));
 
 // Types
 export type UserType = typeof user.$inferSelect;
