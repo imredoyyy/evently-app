@@ -92,3 +92,26 @@ svg path.logo-text {
     @apply h-full absolute shadow-sm shadow-muted-foreground/20 rounded-xl w-full bg-center bg-cover bg-no-repeat after:absolute after:inset-0 after:bg-gradient-to-t after:from-[rgba(26,33,41,0.4)] after:to-[rgba(26,33,41,0.6)] after:rounded-xl before:absolute before:inset-0 before:bg-gradient-to-b before:from-[rgba(26,33,41,0.3)] before:via-[rgba(26,33,41,0.5)] before:to-[rgba(26,33,41,0.6)] before:rounded-xl;
   }
 }
+
+/* Scrollbar Style */
+body::-webkit-scrollbar,
+div[data-sidebar="content"]::-webkit-scrollbar {
+  width: 4px;
+}
+
+#table-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+body::-webkit-scrollbar-track,
+div[data-sidebar="content"]::-webkit-scrollbar-track,
+#table-container::-webkit-scrollbar-track {
+  @apply shadow-inner shadow-muted-foreground/20;
+}
+
+body::-webkit-scrollbar-thumb,
+div[data-sidebar="content"]::-webkit-scrollbar-thumb,
+#table-container::-webkit-scrollbar-thumb {
+  @apply bg-slate-700 rounded-2xl;
+  background-clip: content-box;
+}

@@ -18,7 +18,7 @@ import { formatDateTime } from "@/utils/formatter";
 import { copyToClipboard } from "@/utils/copy-clipboard";
 import { cn } from "@/lib/utils";
 
-export const columns: ColumnDef<
+export const eventsColumns: ColumnDef<
   GetOrganizedEventsResponseType["events"][number]
 >[] = [
   {

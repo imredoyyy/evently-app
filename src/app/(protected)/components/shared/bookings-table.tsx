@@ -1,21 +1,18 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarPlus2Icon } from "lucide-react";
-
 import {
-  flexRender,
   ColumnFiltersState,
-  SortingState,
+  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import {
   Table,
@@ -25,38 +22,42 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { eventsColumns } from "./events-column";
-import { Button } from "@/components/ui/button";
-import { PaginationBar } from "@/components/shared/pagination-bar";
+import { bookingsColumns } from "./bookings-column";
 import { Spinner } from "@/components/shared/spinner";
+import { Input } from "@/components/ui/input";
+import { PaginationBar } from "@/components/shared/pagination-bar";
 
-import { getOrganizedEvents } from "@/lib/db/queries/event.query";
+import useDebounce from "@/hooks/use-debounce";
+import { getAllOrders } from "@/lib/db/queries/order.query";
 
-export const EventsTable = ({ userId }: { userId: string }) => {
-  const router = useRouter();
+export const BookingsTable = ({ userId }: { userId: string }) => {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pageSize = 1;
   const [page, setPage] = useState(parseInt(searchParams.get("page") ?? "1"));
-  const pageSize = 15;
-  const { data, isError, isLoading } = useQuery({
-    queryKey: ["organized-events", userId, page, pageSize],
-    queryFn: () => getOrganizedEvents(userId, page, pageSize),
+  const { data, isError, error, isLoading } = useQuery({
+    queryKey: ["bookings", page, pageSize],
+    queryFn: () => getAllOrders(userId, page, pageSize),
     placeholderData: keepPreviousData,
   });
+  const [email, setEmail] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const MemoizedColumns = useMemo(() => eventsColumns, []);
-  const MemoizedEvents = useMemo(() => data?.events || [], [data]);
+
+  const MemoizedColumns = useMemo(() => bookingsColumns, []);
+  const MemoizedEvents = useMemo(() => data?.orders || [], [data]);
+  const debouncedValue = useDebounce(email, 500);
 
   const table = useReactTable({
     data: MemoizedEvents,
     columns: MemoizedColumns,
-    manualPagination: true,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    manualPagination: true,
     state: {
       sorting,
       columnFilters,
@@ -65,22 +66,6 @@ export const EventsTable = ({ userId }: { userId: string }) => {
   });
 
   const { rows } = table.getRowModel();
-
-  const handlePageChange = useCallback(
-    (page: number) => {
-      const newSearchParams = new URLSearchParams(searchParams.toString());
-      newSearchParams.set("page", page.toString());
-      setPage(page);
-      router.push(`?${newSearchParams.toString()}`, { scroll: false });
-    },
-    [router, searchParams]
-  );
-
-  useEffect(() => {
-    if (data?.metadata.currentPage && page !== data?.metadata.currentPage) {
-      setPage(data?.metadata.currentPage);
-    }
-  }, [data?.metadata.currentPage, page]);
 
   const MemoizedTableRows = useMemo(
     () =>
@@ -96,54 +81,61 @@ export const EventsTable = ({ userId }: { userId: string }) => {
     [rows]
   );
 
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const newSearchParams = new URLSearchParams(searchParams.toString());
+      newSearchParams.set("page", page.toString());
+      setPage(page);
+      router.push(`?${newSearchParams.toString()}`, { scroll: false });
+    },
+    [router, searchParams]
+  );
+
+  useEffect(() => {
+    table.getColumn("customerEmail")?.setFilterValue(debouncedValue);
+  }, [table, debouncedValue]);
+
   if (isLoading) {
     return <Spinner />;
   }
 
-  if (!data || !data.events) {
-    return (
-      <div className="flex flex-col items-center justify-center w-full min-h-screen">
-        <h2 className="font-semibold text-3xl text-center">
-          You don&apos;t have any events
-        </h2>
-        <Button asChild size="lg" className="mt-6">
-          <Link href="/create-event">Create Event</Link>
-        </Button>
-      </div>
-    );
-  }
-
   if (isError) {
+    return <div>{error.message}</div>;
+  }
+
+  if (!data) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-screen">
-        <h2 className="font-semibold text-3xl text-center">
-          Something went wrong
+      <div className="min-h-screen grid place-items-center w-full">
+        <h2 className="text-2xl font-semibold md:text-3xl">
+          You have no bookings
         </h2>
       </div>
     );
   }
 
-  const totalPages = data?.metadata.totalPages;
+  const totalPages = data.metadata.totalPages;
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h2 className="font-semibold text-2xl md:text-3xl">My Events</h2>
-          <Button size="lg" asChild>
-            <Link href="/create-event">
-              <span>Create Event</span>
-              <CalendarPlus2Icon />
-            </Link>
-          </Button>
+      <div className="space-y-6 overflow-x-hidden px-2">
+        <h2 className="font-semibold text-2xl md:text-3xl">My Bookings</h2>
+
+        <div className="flex items-center justify-between py-4">
+          <Input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Filter by customer email"
+            className="max-w-sm"
+          />
         </div>
-        <div className="overflow-hidden border rounded-xl">
+
+        <div className="overflow-hidden rounded-xl border">
           <Table className="overflow-hidden">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="whitespace-nowrap">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -165,7 +157,7 @@ export const EventsTable = ({ userId }: { userId: string }) => {
                     colSpan={MemoizedColumns.length}
                     className="h-24 text-center"
                   >
-                    No events found..
+                    No bookings found..
                   </TableCell>
                 </TableRow>
               )}
@@ -174,13 +166,16 @@ export const EventsTable = ({ userId }: { userId: string }) => {
         </div>
       </div>
 
-      <Suspense>
-        <PaginationBar
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      </Suspense>
+      {/* Pagination. If no rows(in case of filtering results are empty), do not show pagination */}
+      {table.getRowModel().rows.length > 0 && (
+        <Suspense>
+          <PaginationBar
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </Suspense>
+      )}
     </>
   );
 };

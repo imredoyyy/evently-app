@@ -15,7 +15,7 @@ const ProtectedLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
       <AppSidebar session={session} />
-      <main className="flex flex-col min-h-screen w-full">
+      <main className="flex flex-col min-h-screen w-full overflow-x-hidden">
         <ProtectedRoutesHeader session={session} />
         {children}
       </main>

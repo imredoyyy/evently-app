@@ -60,8 +60,8 @@ const User_Links: Record<string, UserLinkType[]> = {
       icon: CalendarCheckIcon,
     },
     {
-      label: "My Tickets",
-      href: "/host/my-tickets",
+      label: "My Bookings",
+      href: "/host/my-bookings",
       icon: TicketCheckIcon,
     },
   ],
