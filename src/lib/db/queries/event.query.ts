@@ -215,6 +215,54 @@ const getEventsByCategoryId = async (categoryId: string, eventId: string) => {
   }
 };
 
+const getOrganizedEvents = async (
+  userId: string,
+  page: number,
+  pageSize: number
+) => {
+  try {
+    const { isAdmin, isHost } = await isAdminOrHost(userId);
+
+    if (!isAdmin && !isHost) throw new Error("Unauthorized");
+
+    const whereCondition = isAdmin ? undefined : eq(user.id, userId);
+
+    const eventsQuery = await db
+      .select({
+        ...defalutQuery,
+        organizerEmail: user.email,
+        total: sql<number>`COUNT(*) OVER ()`,
+      })
+      .from(event)
+      .innerJoin(category, eq(category.id, event.categoryId))
+      .innerJoin(user, eq(user.id, event.userId))
+      .where(whereCondition)
+      .orderBy(desc(event.createdAt), desc(event.id))
+      .limit(pageSize + 1)
+      .offset((page - 1) * pageSize);
+
+    const total = eventsQuery[0]?.total || 0;
+    const hasNextPage = eventsQuery.length > pageSize;
+    const data = eventsQuery.slice(0, pageSize);
+
+    return {
+      events: data,
+      metadata: {
+        hasNextPage,
+        nextCursor: hasNextPage ? data[data.length - 1].id : undefined,
+        total,
+        currentPage: page,
+        totalPages: Math.ceil(total / pageSize),
+      },
+    };
+  } catch (err) {
+    console.error("Error fetching events by category:", err);
+    throw new Error(
+      err instanceof Error ? err.message : "Failed to fetch events by category."
+    );
+  }
+};
+
 type PaginatedEventResponseType = Awaited<
   ReturnType<typeof getEventsByComplexQuery>
 >;
@@ -223,12 +271,16 @@ type EventsWithCategoryResponseType = Awaited<
   ReturnType<typeof getEventsByCategoryId>
 >;
 type EventByIdResponseType = Awaited<ReturnType<typeof getEventById>>;
+type GetOrganizedEventsResponseType = Awaited<
+  ReturnType<typeof getOrganizedEvents>
+>;
 
 export {
   getEventsByComplexQuery,
   getEventBySlug,
   getEventById,
   getEventsByCategoryId,
+  getOrganizedEvents,
 };
 
 export type {
@@ -236,4 +288,27 @@ export type {
   EventWithSlugResponseType,
   EventsWithCategoryResponseType,
   EventByIdResponseType,
+  GetOrganizedEventsResponseType,
+};
+
+export const isAdminOrHost = async (userId: string) => {
+  try {
+    const userResult = await db.query.user.findFirst({
+      where: eq(user.id, userId),
+    });
+
+    if (!userResult) throw new Error("User not found");
+
+    return {
+      isAdmin: userResult.role === "admin",
+      isHost: userResult.role === "host",
+    };
+  } catch (err) {
+    console.error("Error checking if user is admin or host:", err);
+    throw new Error(
+      err instanceof Error
+        ? err.message
+        : "Failed to check if user is admin or host."
+    );
+  }
 };
