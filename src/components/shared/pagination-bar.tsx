@@ -20,19 +20,30 @@ type PaginationBarProps = {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  baseUrl?: string;
+  searchParamsHook?: () => URLSearchParams;
+  urlQueryFormatter?: (params: URLSearchParams, page: number) => string;
 };
 
 export const PaginationBar = memo(
-  ({ currentPage, totalPages, onPageChange }: PaginationBarProps) => {
-    const searchParams = useSearchParams();
+  ({
+    currentPage,
+    totalPages,
+    onPageChange,
+    baseUrl = "",
+    searchParamsHook = useSearchParams,
+    urlQueryFormatter = (params, page) =>
+      `${baseUrl}?${formUrlQuery({
+        params: params.toString(),
+        updates: { page: page.toString() },
+      })}`,
+  }: PaginationBarProps) => {
+    const searchParams = searchParamsHook();
 
     if (totalPages <= 1) return null;
 
     const createPageUrl = (page: number) => {
-      return `/events?${formUrlQuery({
-        params: searchParams.toString(),
-        updates: { page: page.toString() },
-      })}`;
+      return urlQueryFormatter(searchParams, page);
     };
 
     const handlePreviousPage = () => {
@@ -53,7 +64,10 @@ export const PaginationBar = memo(
           <PaginationItem>
             <PaginationPrevious
               href={createPageUrl(currentPage - 1)}
-              onClick={handlePreviousPage}
+              onClick={(e) => {
+                e.preventDefault();
+                handlePreviousPage();
+              }}
               className={cn(
                 currentPage === 1 && "text-muted-foreground pointer-events-none"
               )}
@@ -89,7 +103,10 @@ export const PaginationBar = memo(
               >
                 <PaginationLink
                   href={createPageUrl(page)}
-                  onClick={() => handlePageClick(page)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageClick(page);
+                  }}
                   aria-current={isActivePage ? "page" : undefined}
                   isActive={isActivePage}
                 >
@@ -102,7 +119,10 @@ export const PaginationBar = memo(
           <PaginationItem>
             <PaginationNext
               href={createPageUrl(currentPage + 1)}
-              onClick={handleNextPage}
+              onClick={(e) => {
+                e.preventDefault();
+                handleNextPage();
+              }}
               className={cn(
                 currentPage >= totalPages &&
                   "text-muted-foreground pointer-events-none"

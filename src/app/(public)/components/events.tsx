@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { EventCardSkeleton } from "@/components/shared/event-card-skeleton";
 import { EventCard } from "@/components/shared/event-card";
-import { PaginationBar } from "./pagination-bar";
+import { PaginationBar } from "@/components/shared/pagination-bar";
 
 import { getEventsByComplexQuery } from "@/lib/db/queries/event.query";
 
@@ -83,6 +83,7 @@ export const Events = () => {
           currentPage={data.metadata.currentPage}
           totalPages={data.metadata.totalPages}
           onPageChange={handlePageChange}
+          baseUrl="/events"
         />
       </Suspense>
     </>
