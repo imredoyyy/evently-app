@@ -29,15 +29,16 @@ import { PaginationBar } from "@/components/shared/pagination-bar";
 
 import useDebounce from "@/hooks/use-debounce";
 import { getAllOrders } from "@/lib/db/queries/order.query";
+import type { Session } from "@/types";
 
-export const BookingsTable = ({ userId }: { userId: string }) => {
+export const BookingsTable = ({ session }: { session: Session }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const pageSize = 1;
+  const pageSize = 10;
   const [page, setPage] = useState(parseInt(searchParams.get("page") ?? "1"));
   const { data, isError, error, isLoading } = useQuery({
     queryKey: ["bookings", page, pageSize],
-    queryFn: () => getAllOrders(userId, page, pageSize),
+    queryFn: () => getAllOrders(session!.user.id, page, pageSize),
     placeholderData: keepPreviousData,
   });
   const [email, setEmail] = useState("");
@@ -118,7 +119,9 @@ export const BookingsTable = ({ userId }: { userId: string }) => {
   return (
     <>
       <div className="space-y-6 overflow-x-hidden px-2">
-        <h2 className="font-semibold text-2xl md:text-3xl">My Bookings</h2>
+        <h2 className="font-semibold text-2xl md:text-3xl">
+          {session.user.role === "admin" ? "All Bookings" : "My Bookings"}
+        </h2>
 
         <div className="flex items-center justify-between py-4">
           <Input

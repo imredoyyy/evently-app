@@ -20,14 +20,12 @@ import { getSession } from "@/utils/get-session";
 const Page = async () => {
   const session = await getSession();
 
-  if (session?.user.role !== "host") redirect("/");
+  if (session?.user.role !== "admin") redirect("/");
 
   return (
-    <>
-      <Container className="overflow-x-hidden">
-        <BookingsTable session={session!} />
-      </Container>
-    </>
+    <Container>
+      <BookingsTable session={session!} />
+    </Container>
   );
 };
 
