@@ -82,6 +82,28 @@ export const EventsTable = ({ userId }: { userId: string }) => {
     }
   }, [data?.metadata.currentPage, page]);
 
+  const MemoizedTableHeaders = useMemo(
+    () => (
+      <TableHeader>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <TableHead key={header.id} className="whitespace-nowrap">
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
+      </TableHeader>
+    ),
+    [table]
+  );
+
   const MemoizedTableRows = useMemo(
     () =>
       rows.map((row) => (
@@ -100,14 +122,14 @@ export const EventsTable = ({ userId }: { userId: string }) => {
     return <Spinner />;
   }
 
-  if (!data || !data.events) {
+  if (!data || data.events.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center w-full min-h-screen">
+      <div className="flex flex-col items-center justify-center w-full min-h-[90vh]">
         <h2 className="font-semibold text-3xl text-center">
           You don&apos;t have any events
         </h2>
         <Button asChild size="lg" className="mt-6">
-          <Link href="/create-event">Create Event</Link>
+          <Link href="/create-event">Create an Event</Link>
         </Button>
       </div>
     );
@@ -139,22 +161,7 @@ export const EventsTable = ({ userId }: { userId: string }) => {
         </div>
         <div className="overflow-hidden border rounded-xl">
           <Table className="overflow-hidden">
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
+            {MemoizedTableHeaders}
 
             <TableBody>
               {rows.length > 0 ? (
@@ -165,7 +172,7 @@ export const EventsTable = ({ userId }: { userId: string }) => {
                     colSpan={MemoizedColumns.length}
                     className="h-24 text-center"
                   >
-                    No events found..
+                    No events found...
                   </TableCell>
                 </TableRow>
               )}

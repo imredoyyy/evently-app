@@ -37,7 +37,7 @@ export const BookingsTable = ({ session }: { session: Session }) => {
   const pageSize = 10;
   const [page, setPage] = useState(parseInt(searchParams.get("page") ?? "1"));
   const { data, isError, error, isLoading } = useQuery({
-    queryKey: ["bookings", page, pageSize],
+    queryKey: ["bookings", session!.user.id, page, pageSize],
     queryFn: () => getAllOrders(session!.user.id, page, pageSize),
     placeholderData: keepPreviousData,
   });
@@ -46,11 +46,11 @@ export const BookingsTable = ({ session }: { session: Session }) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const MemoizedColumns = useMemo(() => bookingsColumns, []);
-  const MemoizedEvents = useMemo(() => data?.orders || [], [data]);
+  const MemoizedOrders = useMemo(() => data?.orders || [], [data]);
   const debouncedValue = useDebounce(email, 500);
 
   const table = useReactTable({
-    data: MemoizedEvents,
+    data: MemoizedOrders,
     columns: MemoizedColumns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -67,6 +67,28 @@ export const BookingsTable = ({ session }: { session: Session }) => {
   });
 
   const { rows } = table.getRowModel();
+
+  const MemoizedTableHeaders = useMemo(
+    () => (
+      <TableHeader>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <TableHead key={header.id} className="whitespace-nowrap">
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
+      </TableHeader>
+    ),
+    [table]
+  );
 
   const MemoizedTableRows = useMemo(
     () =>
@@ -134,22 +156,7 @@ export const BookingsTable = ({ session }: { session: Session }) => {
 
         <div className="overflow-hidden rounded-xl border">
           <Table className="overflow-hidden">
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="whitespace-nowrap">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
+            {MemoizedTableHeaders}
 
             <TableBody>
               {rows.length > 0 ? (
