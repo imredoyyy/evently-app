@@ -17,6 +17,11 @@ const defaultOrderQuery = {
   amount: order.amount,
   status: order.status,
   purchasedAt: order.purchasedAt,
+  financialDetails: {
+    totalEarnings: event.totalEarnings,
+    organizersEarnings: event.organizerEarnings,
+    platformsEarnings: event.platformsEarnings,
+  },
   ticketDetails: {
     id: ticketDetails.id,
     name: ticketDetails.name,
@@ -38,11 +43,27 @@ const getAllOrders = async (userId: string, page: number, pageSize: number) => {
 
     if (!isAdmin && !isHost) throw new Error("Unauthorized");
 
+    // Admin can fetch all orders and events.
+    // Host can only fetch orders associated with their own events.
     const whereCondition = isAdmin ? undefined : eq(event.userId, userId);
+
+    const toalBookingsQuery = db
+      .select({
+        eventId: event.id,
+        totalBookings: sql<number>`COUNT(${ticket.id})`.as("totalBookings"),
+      })
+      .from(event)
+      .leftJoin(ticket, eq(ticket.eventId, event.id))
+      .groupBy(event.id)
+      .as("totalBookingsQuery");
 
     const result = await db
       .select({
         ...defaultOrderQuery,
+        financialDetails: {
+          ...defaultOrderQuery.financialDetails,
+          totalBookings: toalBookingsQuery.totalBookings,
+        },
         total: sql<number>`COUNT(*) OVER ()`,
       })
       .from(order)
@@ -53,7 +74,15 @@ const getAllOrders = async (userId: string, page: number, pageSize: number) => {
         and(eq(ticket.eventId, event.id), eq(ticket.orderId, order.id))
       )
       .leftJoin(ticketDetails, eq(ticket.ticketDetailsId, ticketDetails.id))
-      .groupBy(order.id, event.id, user.id, ticket.id, ticketDetails.id)
+      .leftJoin(toalBookingsQuery, eq(toalBookingsQuery.eventId, event.id))
+      .groupBy(
+        order.id,
+        event.id,
+        user.id,
+        ticket.id,
+        ticketDetails.id,
+        toalBookingsQuery.totalBookings
+      )
       .where(whereCondition)
       .orderBy(desc(order.purchasedAt))
       .limit(pageSize + 1) // +1 to check if there are more pages
@@ -78,7 +107,7 @@ const getAllOrders = async (userId: string, page: number, pageSize: number) => {
   } catch (err) {
     console.error("Error fetching orders by user id:", err);
     throw new Error(
-      err instanceof Error ? err.message : "Failed to fetch orders by user id."
+      err instanceof Error ? err.message : "Failed to fetch orders."
     );
   }
 };
