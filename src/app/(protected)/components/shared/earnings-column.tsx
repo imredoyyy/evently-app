@@ -101,13 +101,13 @@ export const earningsColumns: ColumnDef<UniqueOrderData>[] = [
     ),
   },
   {
-    id: "commisions",
+    accessorKey: "platformsEarnings",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Commisions
+        Platforms Earnings
         <ArrowUpDownIcon />
       </Button>
     ),
@@ -118,13 +118,13 @@ export const earningsColumns: ColumnDef<UniqueOrderData>[] = [
     ),
   },
   {
-    id: "totalProfit",
+    accessorKey: "organizersEarnings",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Total Profit
+        Organizers Earnings
         <ArrowUpDownIcon />
       </Button>
     ),
