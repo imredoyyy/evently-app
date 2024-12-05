@@ -50,7 +50,7 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
-  const isHost = pathname === "/host-sign-up" || pathname === "/host-sign-in";
+  const isHost = pathname === "/host-sign-up";
 
   const handleSignIn = async (data: SignInValues) => {
     await signIn.email(
@@ -112,18 +112,6 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
         return;
       }
       await handleSignUp(data);
-    }
-  };
-
-  const generateRoleBasedLink = () => {
-    if (mode === "sign-up" && isHost) {
-      return "/host-sign-in";
-    } else if (mode === "sign-in" && isHost) {
-      return "/host-sign-up";
-    } else if (mode === "sign-up") {
-      return "/sign-in";
-    } else {
-      return "/sign-up";
     }
   };
 
@@ -248,11 +236,21 @@ export const AuthForm = ({ mode = "sign-in" }: AuthFormProps) => {
               className="w-full focus:ring-primary focus:ring-2 focus:ring-offset-2 focus:outline-none"
             >
               <Link
-                href={`${generateRoleBasedLink()}${redirect ? `?redirect=${redirect}` : ""}`}
+                href={`${mode === "sign-in" ? "sign-up" : "sign-in"}${redirect ? `?redirect=${redirect}` : ""}`}
               >
                 {mode === "sign-in" ? "Create an account" : "Sign in"}
               </Link>
             </Button>
+
+            {!isHost && (
+              <Button asChild className="w-full mt-4">
+                <Link
+                  href={`/host-sign-up${redirect ? `?redirect=${redirect}` : ""}`}
+                >
+                  Join as Host
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>
