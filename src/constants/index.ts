@@ -6,6 +6,14 @@ import {
   TicketCheckIcon,
   Users2Icon,
   CalendarPlusIcon,
+  BanknoteIcon,
+  FacebookIcon,
+  InstagramIcon,
+  TwitterIcon,
+  LinkedinIcon,
+  PhoneIcon,
+  MapPinIcon,
+  MailIcon,
 } from "lucide-react";
 
 import { TicketType } from "@/lib/db/schema";
@@ -64,6 +72,11 @@ const User_Links: Record<string, UserLinkType[]> = {
       href: "/host/my-bookings",
       icon: TicketCheckIcon,
     },
+    {
+      label: "My Earnings",
+      href: "/host/my-earnings",
+      icon: BanknoteIcon,
+    },
   ],
   admin: [
     ...Common_User_ButtonLinks,
@@ -82,6 +95,16 @@ const User_Links: Record<string, UserLinkType[]> = {
       href: "/admin/all-users",
       icon: Users2Icon,
     },
+    {
+      label: "All Bookings",
+      href: "/admin/all-bookings",
+      icon: TicketCheckIcon,
+    },
+    {
+      label: "All Earnings",
+      href: "/admin/all-earnings",
+      icon: BanknoteIcon,
+    },
   ],
 };
 
@@ -92,4 +115,90 @@ const TICKET_STATUS: Record<string, TicketType["status"]> = {
   CANCELLED: "cancelled",
 } as const;
 
-export { Nav_Links, User_Links, TICKET_STATUS };
+const Social_Links = [
+  {
+    label: "Facebook",
+    href: "#",
+    icon: FacebookIcon,
+  },
+  {
+    label: "Instagram",
+    href: "#",
+    icon: InstagramIcon,
+  },
+  {
+    label: "Twitter",
+    href: "#",
+    icon: TwitterIcon,
+  },
+  {
+    label: "Linkedin",
+    href: "#",
+    icon: LinkedinIcon,
+  },
+];
+
+const Quick_Links = [
+  {
+    label: "Events",
+    href: "/events",
+  },
+  {
+    label: "About",
+    href: "/about",
+  },
+  {
+    label: "Sign In",
+    href: "/sign-in",
+  },
+  {
+    label: "Join as a Host",
+    href: "/host-sign-up",
+  },
+];
+
+const Useful_Links = [
+  {
+    label: "Home",
+    href: "/",
+  },
+  {
+    label: "Privacy Policy",
+    href: "/privacy-policy",
+  },
+  {
+    label: "Terms & Conditions",
+    href: "/terms",
+  },
+  {
+    label: "Contact",
+    href: "/contact",
+  },
+];
+
+const Footer_Contact_Info = [
+  {
+    icon: PhoneIcon,
+    label: "+1 (123) 456-7890",
+    href: "tel:+11234567890",
+  },
+  {
+    icon: MapPinIcon,
+    label: "123 Main Street, City, State",
+  },
+  {
+    icon: MailIcon,
+    label: "example@domain.com",
+    href: "mailto:example@domain.com",
+  },
+];
+
+export {
+  Nav_Links,
+  User_Links,
+  TICKET_STATUS,
+  Social_Links,
+  Quick_Links,
+  Useful_Links,
+  Footer_Contact_Info,
+};
