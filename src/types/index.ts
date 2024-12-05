@@ -59,7 +59,7 @@ export type CreateOrderParams = {
   orderItems: OrderItem[];
   totalAmount: string;
   status: OrderType["status"];
-  paymentIntentId: string;
+  paymentIntentId: string | null;
 };
 
 export type FormUrlQueryParams = {

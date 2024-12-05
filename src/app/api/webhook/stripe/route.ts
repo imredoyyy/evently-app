@@ -57,12 +57,6 @@ export const POST = async (req: Request) => {
         );
       }
 
-      if (!payment_intent) {
-        return NextResponse.json(
-          { error: "Missing payment intent id" },
-          { status: 400 }
-        );
-      }
       let orderItems: OrderItem[];
       try {
         orderItems = JSON.parse(metadata.orderItems) as OrderItem[];
@@ -86,7 +80,7 @@ export const POST = async (req: Request) => {
           session.payment_status === "no_payment_required"
             ? "paid"
             : "pending",
-        paymentIntentId: payment_intent as string,
+        paymentIntentId: payment_intent ? (payment_intent as string) : null,
       };
 
       try {
