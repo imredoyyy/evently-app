@@ -4,6 +4,7 @@ import { desc, eq, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db/drizzle";
 import { ticket, event, ticketDetails, order, user } from "@/lib/db/schema";
+import { getUserById } from "@/lib/db/queries/user.query";
 
 const defaultTicketQuery = {
   id: ticket.id,
@@ -12,6 +13,7 @@ const defaultTicketQuery = {
   status: ticket.status,
   pricePerTicket: ticket.pricePerTicket,
   purchasedAt: ticket.purchasedAt,
+  userId: ticket.userId,
   user: {
     id: user.id,
     name: user.name,
@@ -34,6 +36,7 @@ const defaultTicketQuery = {
     startDate: event.startDate,
     endDate: event.endDate,
     isFree: event.isFree,
+    hostId: event.userId,
   },
   ticketDetails: {
     id: ticketDetails.id,
@@ -102,8 +105,15 @@ const getUserTickets = async (userId: string) => {
   }
 };
 
-const getTicketWithDetails = async (ticketId: string) => {
+const getTicketWithDetails = async (
+  ticketId: string,
+  requestingUserId: string
+) => {
   try {
+    const existingUser = await getUserById(requestingUserId);
+
+    if (!existingUser) throw new Error("No user found");
+
     const [ticketResult] = await db
       .select({
         ...defaultTicketQuery,
@@ -116,8 +126,16 @@ const getTicketWithDetails = async (ticketId: string) => {
       .where(eq(ticket.id, ticketId))
       .limit(1);
 
-    if (!ticketResult) {
-      throw new Error("Ticket not found");
+    if (!ticketResult) throw new Error("Ticket not found");
+
+    // Authorization check
+    const isEventOwner = ticketResult.event.hostId === existingUser.id;
+    const isTicketOwner = ticketResult.userId === existingUser.id;
+
+    if (!isEventOwner && !isTicketOwner) {
+      throw new Error(
+        "Unauthorized: You do not have permission to view this ticket"
+      );
     }
 
     return ticketResult;
@@ -129,4 +147,8 @@ const getTicketWithDetails = async (ticketId: string) => {
   }
 };
 
+type GetUserTickets = Awaited<ReturnType<typeof getUserTickets>>;
+
 export { getTicketAvailability, getUserTickets, getTicketWithDetails };
+
+export type { GetUserTickets };
