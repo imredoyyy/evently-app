@@ -14,6 +14,7 @@ import {
   PhoneIcon,
   MapPinIcon,
   MailIcon,
+  TicketsIcon,
 } from "lucide-react";
 
 import { TicketType } from "@/lib/db/schema";
@@ -44,17 +45,15 @@ const Common_User_ButtonLinks = [
     href: "/settings",
     icon: SettingsIcon,
   },
+  {
+    label: "My Tickets",
+    href: "/my-tickets",
+    icon: TicketsIcon,
+  },
 ];
 
 const User_Links: Record<string, UserLinkType[]> = {
-  user: [
-    ...Common_User_ButtonLinks,
-    {
-      label: "My Tickets",
-      href: "/my-tickets",
-      icon: TicketCheckIcon,
-    },
-  ],
+  user: [...Common_User_ButtonLinks],
   host: [
     ...Common_User_ButtonLinks,
     {
