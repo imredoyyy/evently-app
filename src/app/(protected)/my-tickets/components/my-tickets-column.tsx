@@ -49,12 +49,7 @@ export const myTicketsColumns: ColumnDef<UserTicket>[] = [
     header: "Ticket Status",
     cell: ({ row }) => {
       const ticket = row.original;
-      const isPastEvent = ticket.event.endDate < new Date();
-      return (
-        <div className="capitalize">
-          {isPastEvent ? "Expired" : ticket.status}
-        </div>
-      );
+      return <div className="capitalize">{ticket.status}</div>;
     },
   },
   {

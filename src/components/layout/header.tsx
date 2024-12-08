@@ -23,7 +23,7 @@ const Header = ({ session }: { session: Session }) => {
     <header
       className={cn(
         "sticky top-0 z-50 w-full border-b border-transparent bg-background shadow-sm transition-all",
-        scrolled && "border-muted-foreground/20 bg-muted/30 backdrop-blur-md"
+        scrolled && "border-muted-foreground/20 bg-muted/70 backdrop-blur-md"
       )}
     >
       <div className="mx-auto flex max-w-screen-xl items-center justify-between p-4 md:px-8">
