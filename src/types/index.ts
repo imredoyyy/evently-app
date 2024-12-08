@@ -1,7 +1,7 @@
 import { EventFormValues } from "@/app/(protected)/zod-schemas";
 import type { auth } from "@/lib/auth";
 import type { EventWithSlugResponseType } from "@/lib/db/queries/event.query";
-import type { OrderType } from "@/lib/db/schema";
+import type { OrderType, TicketType } from "@/lib/db/schema";
 import type { LucideIcon } from "lucide-react";
 
 export type Session = typeof auth.$Infer.Session;
@@ -80,3 +80,5 @@ export type UpdateEventFormValues = Omit<EventFormValues, "tickets"> & {
     }
   >;
 };
+
+export type TicketStatus = TicketType["status"];

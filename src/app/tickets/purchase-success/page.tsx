@@ -69,7 +69,7 @@ const Page = async ({
               </p>
             </div>
 
-            <Ticket ticketId={latestTickt.id} />
+            <Ticket ticketId={latestTickt.id} userId={session.user.id} />
           </div>
         </div>
       </Container>
