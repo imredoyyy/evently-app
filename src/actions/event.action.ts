@@ -1,15 +1,22 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db/drizzle";
-import { event, NewEventType, ticketDetails, user } from "@/lib/db/schema";
+import {
+  event,
+  NewEventType,
+  order,
+  ticketDetails,
+  user,
+} from "@/lib/db/schema";
 
 import { EventFormValues } from "@/app/(protected)/zod-schemas";
 import { getSession } from "@/utils/get-session";
 import { redirect } from "next/navigation";
 import { generateSlug } from "@/lib/utils";
 import type { UpdateEventFormValues } from "@/types";
+import { isAdminOrHost } from "@/lib/db/queries/event.query";
 
 const createEvent = async (data: EventFormValues) => {
   try {
@@ -199,4 +206,85 @@ const updateEvent = async (data: UpdateEventFormValues, eventId: string) => {
   }
 };
 
-export { createEvent, updateEvent };
+const deleteEvent = async (eventId: string) => {
+  try {
+    return await db.transaction(async (tx) => {
+      const session = await getSession();
+
+      if (!session) throw new Error("No session found");
+
+      const { isAdmin, isHost } = await isAdminOrHost(session.user.id);
+
+      if (!isAdmin && !isHost)
+        throw new Error("You are not authorized to delete this event");
+
+      const whereCondition = isAdmin
+        ? eq(event.id, eventId) // Admins can delete any event
+        : and(eq(event.id, eventId), eq(event.userId, session.user.id)); // Hosts can delete their own
+
+      // Check if the event exists
+      const eventResult = await tx.query.event.findFirst({
+        where: whereCondition,
+      });
+
+      if (!eventResult)
+        throw new Error("Event not found or not authorized to delete");
+
+      // Check for any associated orders to prevent deletion
+      const ordersAssociatedWithEvent = await tx
+        .select()
+        .from(order)
+        .where(eq(order.eventId, eventId));
+
+      if (ordersAssociatedWithEvent.length > 0)
+        throw new Error("This event has associated orders. Cannot delete");
+
+      // Delete the event
+      await tx.delete(event).where(eq(event.id, eventId));
+
+      return { success: true };
+    });
+  } catch (err) {
+    console.error("Error deleting event", err);
+    throw new Error(
+      err instanceof Error ? err.message : "Failed to delete event"
+    );
+  }
+};
+
+const cancelEvent = async (eventId: string) => {
+  try {
+    const session = await getSession();
+
+    if (!session) throw new Error("No session found");
+
+    const { isAdmin, isHost } = await isAdminOrHost(session.user.id);
+
+    if (!isAdmin && !isHost)
+      throw new Error("You are not authorized to cancel this event");
+
+    const whereCondition = isAdmin
+      ? eq(event.id, eventId) // Admins can cancel any event
+      : and(eq(event.id, eventId), eq(event.userId, session.user.id)); // Hosts can cancel their own
+
+    const [cancelledEvent] = await db
+      .update(event)
+      .set({ isCancelled: true })
+      .where(whereCondition)
+      .returning();
+
+    if (!cancelledEvent) throw new Error("Failed to cancel event");
+
+    return {
+      success: true,
+      event: cancelledEvent,
+    };
+  } catch (err) {
+    console.error("Error canceling event", err);
+    throw new Error(
+      err instanceof Error ? err.message : "Failed to cancel event"
+    );
+  }
+};
+
+export { createEvent, updateEvent, deleteEvent, cancelEvent };
