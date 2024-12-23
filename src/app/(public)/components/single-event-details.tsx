@@ -101,7 +101,7 @@ export const SingleEventDetails = ({ event }: Props) => {
               </EventMetadata>
 
               <EventMetadata icon={MapPinCheckIcon} label="Location">
-                <>{event.location}</>
+                <>{event.isOnline ? "Online" : event.location}</>
               </EventMetadata>
               <EventMetadata icon={TicketIcon} label="Ticket Price">
                 <>

@@ -169,8 +169,8 @@ export const CancelEventDialog = () => {
   const cancelEvent = () => {
     if (!eventId) return;
 
-    try {
-      startTransition(async () => {
+    startTransition(async () => {
+      try {
         const res = await refundEventTickets(eventId);
         if (res.success) {
           onClose();
@@ -183,12 +183,13 @@ export const CancelEventDialog = () => {
             </>
           );
         }
-      });
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to cancel event"
-      );
-    }
+      } catch (err) {
+        onClose();
+        toast.error(
+          err instanceof Error ? err.message : "Failed to cancel event"
+        );
+      }
+    });
   };
 
   return (
@@ -226,19 +227,20 @@ export const DeleteEventDialog = () => {
   const cancelEvent = () => {
     if (!eventId) return;
 
-    try {
-      startTransition(async () => {
+    startTransition(async () => {
+      try {
         const res = await deleteEvent(eventId);
         if (res.success) {
           onDeleteModalClose();
           toast.success("Event delete successfully");
         }
-      });
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to cancel event"
-      );
-    }
+      } catch (err) {
+        onDeleteModalClose();
+        toast.error(
+          err instanceof Error ? err.message : "Failed to cancel event"
+        );
+      }
+    });
   };
 
   return (
